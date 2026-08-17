@@ -372,6 +372,33 @@ with open('schema_generated.sql', 'w') as f:
             if col['name'] == 'nationality':
                 constraint_clause = "DEFAULT 'Kenyan'" + (" " + constraint_clause if constraint_clause else "")
 
+            # Set logical defaults to prevent NOT NULL violations
+            if dtype == 'boolean':
+                if col['name'] == 'is_active':
+                    constraint_clause = "DEFAULT TRUE" + (" " + constraint_clause if constraint_clause else "")
+                else:
+                    constraint_clause = "DEFAULT FALSE" + (" " + constraint_clause if constraint_clause else "")
+            
+            if 'status' in col['name']:
+                if col['name'] == 'enrollment_status':
+                    constraint_clause = "DEFAULT 'ENROLLED'" + (" " + constraint_clause if constraint_clause else "")
+                elif col['name'] == 'admission_status':
+                    constraint_clause = "DEFAULT 'ADMITTED'" + (" " + constraint_clause if constraint_clause else "")
+                elif col['name'] == 'status' and t_name == 'student_admission_requests':
+                    constraint_clause = "DEFAULT 'PENDING'" + (" " + constraint_clause if constraint_clause else "")
+                else:
+                    constraint_clause = "DEFAULT 'ACTIVE'" + (" " + constraint_clause if constraint_clause else "")
+                    
+            if col['name'] == 'assignment_role':
+                constraint_clause = "DEFAULT 'TEACHER'" + (" " + constraint_clause if constraint_clause else "")
+            if col['name'] == 'employment_type':
+                constraint_clause = "DEFAULT 'TEACHING'" + (" " + constraint_clause if constraint_clause else "")
+            if col['name'] == 'contract_type':
+                constraint_clause = "DEFAULT 'PERMANENT'" + (" " + constraint_clause if constraint_clause else "")
+            if col['name'] == 'role' and t_name == 'staff':
+                constraint_clause = "DEFAULT 'TEACHER'" + (" " + constraint_clause if constraint_clause else "")
+            if col['name'] == 'gender':
+                constraint_clause = "DEFAULT 'MALE'" + (" " + constraint_clause if constraint_clause else "")
                 
             cdef = f"    {col['name']} {dtype} {null_clause} {constraint_clause}".strip()
             # replace multiple spaces
