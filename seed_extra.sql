@@ -96,13 +96,13 @@ BEGIN
         -- Skip if admission number exists
         CONTINUE WHEN EXISTS (SELECT 1 FROM students WHERE admission_number = v_adm);
 
-        INSERT INTO students (admission_number, first_name, last_name, date_of_birth, gender, status)
-        VALUES (v_adm, v_first, v_last, v_dob, 'MALE', 'ACTIVE')
+        INSERT INTO students (admission_number, first_name, last_name, date_of_birth, gender, status, nationality)
+        VALUES (v_adm, v_first, v_last, v_dob, 'MALE', 'ACTIVE', 'Kenyan')
         RETURNING id INTO v_student_id;
 
         -- Enroll student in a class
-        INSERT INTO student_enrollments (student_id, class_id, academic_year_id, enrollment_date)
-        VALUES (v_student_id, v_class, v_ay_id, CURRENT_DATE)
+        INSERT INTO student_enrollments (student_id, class_id, academic_year_id, enrollment_date, enrollment_status)
+        VALUES (v_student_id, v_class, v_ay_id, CURRENT_DATE, 'ENROLLED')
         ON CONFLICT DO NOTHING;
 
         -- Assign 70% of students to dorms (boarders)
