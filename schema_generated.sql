@@ -1,5 +1,13 @@
 -- GENERATED SCHEMA FROM LOCAL DATABASE
 
+DROP TABLE IF EXISTS 
+    academic_years, classes, dormitories, subjects, schools, users, parents, staff, students, exams, 
+    exam_results, fee_structure, fee_payments, attendance, emergency_contacts, hod_assignments, notices, 
+    staff_class_assignments, staff_subjects, student_admission_requests, student_admissions, 
+    student_boarding_assignments, student_documents, student_enrollments, student_parents, system_users
+CASCADE;
+
+
 CREATE TABLE IF NOT EXISTS academic_years (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     year integer NOT NULL UNIQUE,

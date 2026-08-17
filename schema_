@@ -1,0 +1,250 @@
+"table_name","column_name","data_type","is_nullable","constraint_type"
+"academic_years","id","bigint","NO","PRIMARY KEY"
+"academic_years","year","integer","NO","UNIQUE"
+"academic_years","start_date","date","NO",NULL
+"academic_years","end_date","date","NO",NULL
+"academic_years","is_current","boolean","NO",NULL
+"academic_years","created_at","timestamp without time zone","NO",NULL
+"attendance","id","integer","NO","PRIMARY KEY"
+"attendance","student_id","integer","YES","UNIQUE"
+"attendance","class_id","integer","YES","FOREIGN KEY"
+"attendance","date","date","NO","UNIQUE"
+"attendance","status","text","YES",NULL
+"attendance","recorded_by","integer","YES","FOREIGN KEY"
+"attendance","created_at","timestamp with time zone","YES",NULL
+"classes","id","bigint","NO","PRIMARY KEY"
+"classes","name","character varying","NO",NULL
+"classes","level","character varying","NO","UNIQUE"
+"classes","stream","character varying","YES","UNIQUE"
+"classes","capacity","integer","YES",NULL
+"classes","created_at","timestamp without time zone","NO",NULL
+"dormitories","id","bigint","NO","PRIMARY KEY"
+"dormitories","name","character varying","NO","UNIQUE"
+"dormitories","capacity","integer","NO",NULL
+"dormitories","gender","character varying","YES",NULL
+"dormitories","created_at","timestamp without time zone","NO",NULL
+"emergency_contacts","id","bigint","NO","PRIMARY KEY"
+"emergency_contacts","student_id","bigint","NO","FOREIGN KEY"
+"emergency_contacts","full_name","character varying","NO",NULL
+"emergency_contacts","relationship","character varying","NO",NULL
+"emergency_contacts","phone","character varying","NO",NULL
+"emergency_contacts","alternative_phone","character varying","YES",NULL
+"emergency_contacts","address","text","YES",NULL
+"emergency_contacts","priority","integer","NO",NULL
+"emergency_contacts","created_at","timestamp without time zone","NO",NULL
+"exam_results","id","integer","NO","PRIMARY KEY"
+"exam_results","exam_id","integer","YES","UNIQUE"
+"exam_results","student_id","integer","YES","UNIQUE"
+"exam_results","subject_id","integer","YES","UNIQUE"
+"exam_results","class_id","integer","YES","FOREIGN KEY"
+"exam_results","score","numeric","YES",NULL
+"exam_results","grade","text","YES",NULL
+"exam_results","remarks","text","YES",NULL
+"exam_results","created_at","timestamp with time zone","YES",NULL
+"exams","id","integer","NO","PRIMARY KEY"
+"exams","name","text","NO",NULL
+"exams","academic_year_id","integer","YES","FOREIGN KEY"
+"exams","term","integer","YES",NULL
+"exams","exam_type","text","YES",NULL
+"exams","start_date","date","YES",NULL
+"exams","end_date","date","YES",NULL
+"exams","status","text","YES",NULL
+"exams","created_at","timestamp with time zone","YES",NULL
+"fee_payments","id","integer","NO","PRIMARY KEY"
+"fee_payments","student_id","integer","YES","FOREIGN KEY"
+"fee_payments","academic_year_id","integer","YES","FOREIGN KEY"
+"fee_payments","amount","numeric","NO",NULL
+"fee_payments","fee_type","text","NO",NULL
+"fee_payments","term","integer","YES",NULL
+"fee_payments","payment_date","date","YES",NULL
+"fee_payments","payment_method","text","YES",NULL
+"fee_payments","reference_no","text","YES",NULL
+"fee_payments","received_by","integer","YES","FOREIGN KEY"
+"fee_payments","created_at","timestamp with time zone","YES",NULL
+"fee_structure","id","integer","NO","PRIMARY KEY"
+"fee_structure","academic_year_id","integer","YES","FOREIGN KEY"
+"fee_structure","class_level","integer","NO",NULL
+"fee_structure","fee_type","text","NO",NULL
+"fee_structure","amount","numeric","NO",NULL
+"fee_structure","term","integer","YES",NULL
+"fee_structure","created_at","timestamp with time zone","YES",NULL
+"hod_assignments","id","bigint","NO","PRIMARY KEY"
+"hod_assignments","staff_id","bigint","NO","FOREIGN KEY"
+"hod_assignments","subject_id","bigint","YES","FOREIGN KEY"
+"hod_assignments","department_name","character varying","NO","UNIQUE"
+"hod_assignments","academic_year_id","bigint","NO","UNIQUE"
+"hod_assignments","created_at","timestamp without time zone","NO",NULL
+"notices","id","bigint","NO","PRIMARY KEY"
+"notices","title","character varying","NO",NULL
+"notices","body","text","NO",NULL
+"notices","posted_by","bigint","YES","FOREIGN KEY"
+"notices","target_audience","character varying","NO",NULL
+"notices","is_pinned","boolean","NO",NULL
+"notices","expires_at","date","YES",NULL
+"notices","created_at","timestamp without time zone","NO",NULL
+"parents","id","bigint","NO","PRIMARY KEY"
+"parents","first_name","character varying","NO",NULL
+"parents","middle_name","character varying","YES",NULL
+"parents","last_name","character varying","NO",NULL
+"parents","national_id","character varying","YES","UNIQUE"
+"parents","phone","character varying","NO",NULL
+"parents","alternative_phone","character varying","YES",NULL
+"parents","email","character varying","YES",NULL
+"parents","occupation","character varying","YES",NULL
+"parents","address","text","YES",NULL
+"parents","county","character varying","YES",NULL
+"parents","sub_county","character varying","YES",NULL
+"parents","postal_address","character varying","YES",NULL
+"parents","created_at","timestamp without time zone","NO",NULL
+"parents","updated_at","timestamp without time zone","NO",NULL
+"schools","id","bigint","NO","PRIMARY KEY"
+"schools","name","character varying","NO",NULL
+"schools","emis_code","character varying","YES","UNIQUE"
+"schools","county","character varying","YES",NULL
+"schools","sub_county","character varying","YES",NULL
+"schools","school_level","character varying","NO",NULL
+"schools","created_at","timestamp without time zone","NO",NULL
+"staff","id","bigint","NO","PRIMARY KEY"
+"staff","staff_number","character varying","NO","UNIQUE"
+"staff","first_name","character varying","NO",NULL
+"staff","middle_name","character varying","YES",NULL
+"staff","last_name","character varying","NO",NULL
+"staff","date_of_birth","date","YES",NULL
+"staff","gender","character varying","NO",NULL
+"staff","national_id","character varying","YES","UNIQUE"
+"staff","phone","character varying","NO",NULL
+"staff","alternative_phone","character varying","YES",NULL
+"staff","email","character varying","YES",NULL
+"staff","photo_url","character varying","YES",NULL
+"staff","employment_type","character varying","NO",NULL
+"staff","role","character varying","NO",NULL
+"staff","department","character varying","YES",NULL
+"staff","qualification","character varying","YES",NULL
+"staff","tsc_number","character varying","YES",NULL
+"staff","employment_date","date","YES",NULL
+"staff","contract_type","character varying","NO",NULL
+"staff","salary_grade","character varying","YES",NULL
+"staff","status","character varying","NO",NULL
+"staff","address","text","YES",NULL
+"staff","county","character varying","YES",NULL
+"staff","sub_county","character varying","YES",NULL
+"staff","postal_address","character varying","YES",NULL
+"staff","emergency_contact_name","character varying","YES",NULL
+"staff","emergency_contact_phone","character varying","YES",NULL
+"staff","notes","text","YES",NULL
+"staff","created_at","timestamp without time zone","NO",NULL
+"staff","updated_at","timestamp without time zone","NO",NULL
+"staff_class_assignments","id","bigint","NO","PRIMARY KEY"
+"staff_class_assignments","staff_id","bigint","NO","FOREIGN KEY"
+"staff_class_assignments","class_id","bigint","NO","FOREIGN KEY"
+"staff_class_assignments","subject_id","bigint","YES","FOREIGN KEY"
+"staff_class_assignments","academic_year_id","bigint","NO","FOREIGN KEY"
+"staff_class_assignments","assignment_role","character varying","NO",NULL
+"staff_class_assignments","created_at","timestamp without time zone","NO",NULL
+"staff_subjects","id","bigint","NO","PRIMARY KEY"
+"staff_subjects","staff_id","bigint","NO","UNIQUE"
+"staff_subjects","subject_id","bigint","NO","UNIQUE"
+"staff_subjects","is_primary","boolean","NO",NULL
+"staff_subjects","created_at","timestamp without time zone","NO",NULL
+"student_admission_requests","id","bigint","NO","PRIMARY KEY"
+"student_admission_requests","requested_by","bigint","NO",NULL
+"student_admission_requests","first_name","character varying","NO",NULL
+"student_admission_requests","middle_name","character varying","YES",NULL
+"student_admission_requests","last_name","character varying","NO",NULL
+"student_admission_requests","date_of_birth","date","YES",NULL
+"student_admission_requests","gender","character varying","YES",NULL
+"student_admission_requests","requested_class_id","bigint","YES","FOREIGN KEY"
+"student_admission_requests","reason","text","YES",NULL
+"student_admission_requests","status","character varying","NO",NULL
+"student_admission_requests","reviewed_by","bigint","YES",NULL
+"student_admission_requests","reviewed_at","timestamp without time zone","YES",NULL
+"student_admission_requests","rejection_reason","text","YES",NULL
+"student_admission_requests","created_at","timestamp without time zone","NO",NULL
+"student_admission_requests","updated_at","timestamp without time zone","NO",NULL
+"student_admissions","id","bigint","NO","PRIMARY KEY"
+"student_admissions","student_id","bigint","NO","FOREIGN KEY"
+"student_admissions","previous_school_id","bigint","YES","FOREIGN KEY"
+"student_admissions","admission_date","date","NO",NULL
+"student_admissions","admission_year","integer","NO",NULL
+"student_admissions","entry_level","character varying","YES",NULL
+"student_admissions","admission_type","character varying","YES",NULL
+"student_admissions","admission_letter_number","character varying","YES",NULL
+"student_admissions","admission_status","character varying","NO",NULL
+"student_admissions","approved_by","bigint","YES",NULL
+"student_admissions","approved_at","timestamp without time zone","YES",NULL
+"student_admissions","created_at","timestamp without time zone","NO",NULL
+"student_admissions","updated_at","timestamp without time zone","NO",NULL
+"student_boarding_assignments","id","bigint","NO","PRIMARY KEY"
+"student_boarding_assignments","student_id","bigint","NO","FOREIGN KEY"
+"student_boarding_assignments","dormitory_id","bigint","NO","FOREIGN KEY"
+"student_boarding_assignments","academic_year_id","bigint","NO","FOREIGN KEY"
+"student_boarding_assignments","bed_number","character varying","YES",NULL
+"student_boarding_assignments","start_date","date","NO",NULL
+"student_boarding_assignments","end_date","date","YES",NULL
+"student_boarding_assignments","status","character varying","NO",NULL
+"student_boarding_assignments","created_at","timestamp without time zone","NO",NULL
+"student_documents","id","bigint","NO","PRIMARY KEY"
+"student_documents","student_id","bigint","NO","FOREIGN KEY"
+"student_documents","document_type","character varying","NO",NULL
+"student_documents","document_number","character varying","YES",NULL
+"student_documents","file_url","character varying","NO",NULL
+"student_documents","issue_date","date","YES",NULL
+"student_documents","is_verified","boolean","NO",NULL
+"student_documents","verified_by","bigint","YES",NULL
+"student_documents","verified_at","timestamp without time zone","YES",NULL
+"student_documents","uploaded_at","timestamp without time zone","NO",NULL
+"student_documents","notes","text","YES",NULL
+"student_enrollments","id","bigint","NO","PRIMARY KEY"
+"student_enrollments","student_id","bigint","NO","UNIQUE"
+"student_enrollments","academic_year_id","bigint","NO","UNIQUE"
+"student_enrollments","class_id","bigint","NO","FOREIGN KEY"
+"student_enrollments","enrollment_date","date","NO",NULL
+"student_enrollments","enrollment_status","character varying","NO",NULL
+"student_enrollments","created_at","timestamp without time zone","NO",NULL
+"student_enrollments","updated_at","timestamp without time zone","NO",NULL
+"student_parents","id","bigint","NO","PRIMARY KEY"
+"student_parents","student_id","bigint","NO","UNIQUE"
+"student_parents","parent_id","bigint","NO","FOREIGN KEY"
+"student_parents","relationship","character varying","NO",NULL
+"student_parents","is_primary_contact","boolean","NO",NULL
+"student_parents","is_emergency_contact","boolean","NO",NULL
+"student_parents","created_at","timestamp without time zone","NO",NULL
+"students","id","bigint","NO","PRIMARY KEY"
+"students","admission_number","character varying","YES","UNIQUE"
+"students","first_name","character varying","NO",NULL
+"students","middle_name","character varying","YES",NULL
+"students","last_name","character varying","NO",NULL
+"students","date_of_birth","date","NO",NULL
+"students","gender","character varying","NO",NULL
+"students","birth_certificate_number","character varying","YES","UNIQUE"
+"students","nationality","character varying","NO",NULL
+"students","photo_url","character varying","YES",NULL
+"students","status","character varying","NO",NULL
+"students","created_at","timestamp without time zone","NO",NULL
+"students","updated_at","timestamp without time zone","NO",NULL
+"subjects","id","bigint","NO","PRIMARY KEY"
+"subjects","name","character varying","NO",NULL
+"subjects","code","character varying","YES","UNIQUE"
+"subjects","category","character varying","YES",NULL
+"subjects","is_compulsory","boolean","NO",NULL
+"subjects","description","text","YES",NULL
+"subjects","created_at","timestamp without time zone","NO",NULL
+"system_users","id","bigint","NO","PRIMARY KEY"
+"system_users","username","character varying","NO","UNIQUE"
+"system_users","password_hash","character varying","NO",NULL
+"system_users","role","character varying","NO",NULL
+"system_users","staff_id","bigint","YES","FOREIGN KEY"
+"system_users","student_id","bigint","YES","FOREIGN KEY"
+"system_users","parent_id","bigint","YES","FOREIGN KEY"
+"system_users","is_active","boolean","NO",NULL
+"system_users","last_login","timestamp without time zone","YES",NULL
+"system_users","must_change_password","boolean","NO",NULL
+"system_users","created_at","timestamp without time zone","NO",NULL
+"users","id","bigint","NO","PRIMARY KEY"
+"users","email","character varying","YES","UNIQUE"
+"users","username","character varying","YES","UNIQUE"
+"users","password_hash","character varying","NO",NULL
+"users","is_active","boolean","NO",NULL
+"users","last_login","timestamp without time zone","YES",NULL
+"users","created_at","timestamp without time zone","NO",NULL
+"users","updated_at","timestamp without time zone","NO",NULL
