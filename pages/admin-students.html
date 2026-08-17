@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Students – Kwale High School SMS</title>
+    <meta name="description" content="Manage and view all student records at Kwale High School.">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        /* ── Page-specific additions only (nothing that dashboard.css already covers) ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .summary-card {
+            background: var(--white);
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .summary-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .sc-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing:.06em; margin-bottom:6px; }
+        .sc-value { font-size: 26px; font-weight: 700; color: var(--dark); line-height:1; }
+        .sc-icon  { float:right; font-size:22px; margin-top:-2px; }
+
+        /* Student avatar (green toned) */
+        .stu-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background: var(--green-light); color: var(--green-dark);
+            display:flex; align-items:center; justify-content:center;
+            font-size:12px; font-weight:700; flex-shrink:0;
+        }
+        .stu-name { font-size:13px; font-weight:600; color:var(--dark); }
+        .stu-adm  { font-size:11px; color:var(--text-muted); }
+
+        /* Pagination */
+        .pagination {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:14px 18px; border-top:1px solid var(--gray-border);
+            font-size:13px; color:var(--text-muted); flex-wrap:wrap; gap:10px;
+        }
+        .pag-btns { display:flex; gap:6px; }
+        .pag-btn  {
+            padding:5px 12px; border-radius:6px; border:1px solid var(--gray-border);
+            background:var(--white); font-size:12px; font-weight:600; cursor:pointer;
+            transition:all .2s; font-family:inherit;
+        }
+        .pag-btn:hover:not(:disabled) { border-color:var(--green); color:var(--green); }
+        .pag-btn:disabled { opacity:.4; cursor:default; }
+        .pag-btn.active   { background:var(--green); color:#fff; border-color:var(--green); }
+
+        /* Empty state */
+        .empty-row td { text-align:center; padding:40px; color:var(--text-muted); font-size:13px; }
+
+        @media(max-width:900px) { .summary-grid { grid-template-columns:repeat(2,1fr); } }
+        @media(max-width:600px) {
+            .summary-grid { grid-template-columns:1fr 1fr; gap:10px; }
+            .sc-value { font-size:22px; }
+            .page-toolbar { flex-direction:column; }
+            .page-toolbar .search-bar { width:100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">All Students</span>
+        <div class="topbar-search">
+            <span>🔍</span>
+            <input type="text" id="topbar-search-input" placeholder="Quick search…" autocomplete="off">
+        </div>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <!-- Header row -->
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px;">
+            <div>
+                <h2>Student Records</h2>
+                <p>Manage all enrolled students at Kwale High School</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-outline" id="btn-export" title="Export CSV">⬇ Export</button>
+                <a href="admin-add-student.html" class="btn btn-primary">➕ Add Student</a>
+            </div>
+        </div>
+
+        <!-- Summary cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="sc-icon">🎓</div>
+                <div class="sc-label">Total Students</div>
+                <div class="sc-value" id="sum-total">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-icon">✅</div>
+                <div class="sc-label">Active</div>
+                <div class="sc-value" id="sum-active" style="color:var(--green-dark)">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-icon">🏫</div>
+                <div class="sc-label">Classes</div>
+                <div class="sc-value" id="sum-classes">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-icon">🛏️</div>
+                <div class="sc-label">Boarders</div>
+                <div class="sc-value" id="sum-boarders">—</div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="page-toolbar">
+            <div class="search-bar" style="flex:1;min-width:200px;max-width:420px;">
+                <span>🔍</span>
+                <input type="text" id="search-input" placeholder="Search by name or admission number…" autocomplete="off">
+            </div>
+            <select class="form-select" id="filter-class" style="min-width:160px;">
+                <option value="">All Classes</option>
+            </select>
+            <select class="form-select" id="filter-status" style="min-width:130px;">
+                <option value="">All Statuses</option>
+                <option value="ACTIVE">Active</option>
+                <option value="TRANSFERRED">Transferred</option>
+                <option value="GRADUATED">Graduated</option>
+                <option value="WITHDRAWN">Withdrawn</option>
+                <option value="SUSPENDED">Suspended</option>
+            </select>
+            <button class="btn btn-outline" id="btn-clear-filters">Clear</button>
+        </div>
+
+        <!-- Table card -->
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" id="students-table" style="min-width:700px;">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Student</th>
+                            <th>Adm. Number</th>
+                            <th>Class</th>
+                            <th>Gender</th>
+                            <th>Status</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-body">
+                        <tr class="empty-row"><td colspan="7">Loading students…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <span id="pag-info">—</span>
+                <div class="pag-btns" id="pag-btns"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+// ── Auth ─────────────────────────────────────────────────────────
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+
+// ── State ─────────────────────────────────────────────────────────
+let allStudents = [];
+let filtered    = [];
+let currentPage = 1;
+const PAGE_SIZE = 20;
+
+// ── Load summary stats ────────────────────────────────────────────
+async function loadSummary() {
+    const stats = await apiFetch('/api/stats/dashboard');
+    if (stats) {
+        document.getElementById('sum-total').textContent    = stats.students ?? '—';
+        document.getElementById('sum-boarders').textContent = stats.boarders ?? '—';
+    }
+    const classes = await apiFetch('/api/classes');
+    if (classes) document.getElementById('sum-classes').textContent = classes.length;
+}
+
+// ── Load classes for filter ───────────────────────────────────────
+async function loadClassFilter() {
+    const classes = await apiFetch('/api/classes');
+    if (!classes) return;
+    const sel = document.getElementById('filter-class');
+    classes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        sel.appendChild(opt);
+    });
+}
+
+// ── Load students ─────────────────────────────────────────────────
+async function loadStudents() {
+    const tbody = document.getElementById('students-body');
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Loading…</td></tr>';
+
+    const search = document.getElementById('search-input').value.trim();
+    const cls    = document.getElementById('filter-class').value;
+    const status = document.getElementById('filter-status').value;
+
+    let url = `/api/students?limit=500`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (cls)    url += `&class_id=${cls}`;
+    if (status) url += `&status=${status}`;
+
+    const data = await apiFetch(url);
+    if (!data) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Failed to load students. Is the API server running?</td></tr>';
+        return;
+    }
+
+    allStudents = data;
+    filtered    = data;
+    currentPage = 1;
+
+    // Active count
+    const activeCount = data.filter(s => s.status === 'ACTIVE').length;
+    document.getElementById('sum-active').textContent = activeCount;
+    if (!document.getElementById('sum-total').textContent || document.getElementById('sum-total').textContent === '—') {
+        document.getElementById('sum-total').textContent = data.length;
+    }
+
+    renderPage();
+}
+
+// ── Render current page ───────────────────────────────────────────
+function renderPage() {
+    const tbody  = document.getElementById('students-body');
+    const start  = (currentPage - 1) * PAGE_SIZE;
+    const slice  = filtered.slice(start, start + PAGE_SIZE);
+    const total  = filtered.length;
+
+    if (!slice.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No students found.</td></tr>';
+        document.getElementById('pag-info').textContent = '0 results';
+        document.getElementById('pag-btns').innerHTML = '';
+        return;
+    }
+
+    const statusCls = { ACTIVE:'active', TRANSFERRED:'leave', WITHDRAWN:'inactive', GRADUATED:'pending', SUSPENDED:'inactive' };
+
+    tbody.innerHTML = slice.map((s, i) => {
+        const initials = ((s.first_name||'?')[0] + (s.last_name||'?')[0]).toUpperCase();
+        const fullName = [s.first_name, s.middle_name, s.last_name].filter(Boolean).join(' ');
+        const cls      = statusCls[s.status] || 'active';
+        return `<tr>
+            <td style="color:var(--text-muted);font-size:12px;">${start + i + 1}</td>
+            <td>
+                <div class="staff-cell">
+                    <div class="stu-avatar">${initials}</div>
+                    <div>
+                        <div class="stu-name">${fullName}</div>
+                        <div class="stu-adm">${s.date_of_birth ? calcAge(s.date_of_birth) + ' yrs' : ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);font-family:monospace;">${s.admission_number || '—'}</td>
+            <td style="font-size:12px;">${s.class_name || '<span style="color:var(--text-muted)">Not enrolled</span>'}</td>
+            <td style="font-size:12px;">${s.gender || '—'}</td>
+            <td><span class="badge ${cls}">${s.status}</span></td>
+            <td style="text-align:center;">
+                <a href="admin-student-profile.html?id=${s.id}" class="btn btn-outline btn-sm">View</a>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Pagination info
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    document.getElementById('pag-info').textContent =
+        `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total} students`;
+
+    // Page buttons (show at most 7 pages)
+    const pbtns = document.getElementById('pag-btns');
+    pbtns.innerHTML = '';
+
+    const prev = document.createElement('button');
+    prev.className = 'pag-btn';
+    prev.textContent = '‹ Prev';
+    prev.disabled = currentPage === 1;
+    prev.onclick = () => { currentPage--; renderPage(); };
+    pbtns.appendChild(prev);
+
+    const startPage = Math.max(1, currentPage - 3);
+    const endPage   = Math.min(totalPages, startPage + 6);
+    for (let p = startPage; p <= endPage; p++) {
+        const pb = document.createElement('button');
+        pb.className = 'pag-btn' + (p === currentPage ? ' active' : '');
+        pb.textContent = p;
+        pb.onclick = (pp => () => { currentPage = pp; renderPage(); })(p);
+        pbtns.appendChild(pb);
+    }
+
+    const next = document.createElement('button');
+    next.className = 'pag-btn';
+    next.textContent = 'Next ›';
+    next.disabled = currentPage === totalPages;
+    next.onclick = () => { currentPage++; renderPage(); };
+    pbtns.appendChild(next);
+}
+
+function calcAge(dob) {
+    const d = new Date(dob);
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age--;
+    return age;
+}
+
+// ── Search / filter events ────────────────────────────────────────
+let debounceTimer;
+function onFilterChange() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(loadStudents, 350);
+}
+
+document.getElementById('search-input').addEventListener('input', onFilterChange);
+document.getElementById('topbar-search-input').addEventListener('input', e => {
+    document.getElementById('search-input').value = e.target.value;
+    onFilterChange();
+});
+document.getElementById('filter-class').addEventListener('change', loadStudents);
+document.getElementById('filter-status').addEventListener('change', loadStudents);
+document.getElementById('btn-clear-filters').addEventListener('click', () => {
+    document.getElementById('search-input').value = '';
+    document.getElementById('topbar-search-input').value = '';
+    document.getElementById('filter-class').value = '';
+    document.getElementById('filter-status').value = '';
+    loadStudents();
+});
+
+// ── URL search param auto-fill ────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('search')) {
+    document.getElementById('search-input').value = urlParams.get('search');
+}
+
+// ── Export CSV ────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', () => {
+    if (!allStudents.length) return;
+    const rows = [['#','Admission No','First Name','Last Name','Class','Gender','Status','DOB']];
+    allStudents.forEach((s, i) => {
+        rows.push([i+1, s.admission_number||'', s.first_name||'', s.last_name||'',
+            s.class_name||'', s.gender||'', s.status||'', s.date_of_birth||'']);
+    });
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv,' + encodeURIComponent(csv);
+    a.download = 'khs_students.csv';
+    a.click();
+});
+
+// ── Init ─────────────────────────────────────────────────────────
+loadSummary();
+loadClassFilter();
+loadStudents();
+</script>
+</body>
+</html>

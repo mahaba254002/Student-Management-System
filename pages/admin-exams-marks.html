@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Marks – Kwale High School</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .marks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .class-card {
+            background: var(--white);
+            border: 1.5px solid var(--gray-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        .class-card:hover { border-color: var(--green); transform: translateY(-2px); }
+        .class-card.selected { border-color: var(--green); background: var(--green-light); }
+        .class-icon { font-size: 28px; margin-bottom: 10px; }
+        .class-name { font-size: 16px; font-weight: 700; color: var(--dark); }
+        .class-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .marks-form-section { display: none; margin-top: 24px; }
+        .marks-form-section.visible { display: block; }
+        .score-input {
+            width: 80px; text-align: center;
+            border: 1px solid var(--gray-border);
+            border-radius: 6px; padding: 6px 10px;
+            font-size: 14px; font-weight: 600;
+        }
+        .score-input:focus { outline: none; border-color: var(--green); }
+        .grade-cell { font-weight: 700; min-width: 40px; text-align: center; }
+        .grade-A  { color: #065f46; }
+        .grade-B  { color: #1d4ed8; }
+        .grade-C  { color: #d97706; }
+        .grade-D  { color: #c2410c; }
+        .grade-E  { color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">&#9776;</button>
+        <span class="topbar-title">Enter Marks</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">T</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Teacher</span>
+                    <span class="u-role" id="user-role">Teacher</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="margin-bottom:24px;">
+            <h2>Enter Student Marks</h2>
+            <p>Select a class, pick an exam and subject, then enter marks for each student.</p>
+        </div>
+
+        <!-- Step 1: Select Class -->
+        <div class="card">
+            <div class="card-header"><span class="card-title">Step 1: Select Class</span></div>
+            <div class="marks-grid" id="class-list">
+                <div style="grid-column:1/-1; text-align:center; padding:24px; color:var(--text-muted);">Loading your classes…</div>
+            </div>
+        </div>
+
+        <!-- Step 2: Select Exam & Subject -->
+        <div class="marks-form-section" id="step2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Step 2: Select Exam &amp; Subject</span>
+                </div>
+                <div style="display:flex; gap:16px; flex-wrap:wrap; padding: 0 0 16px;">
+                    <div class="form-group" style="flex:1; min-width:200px;">
+                        <label class="form-label">Exam</label>
+                        <select class="form-select" id="select-exam"></select>
+                    </div>
+                    <div class="form-group" style="flex:1; min-width:200px;">
+                        <label class="form-label">Subject</label>
+                        <select class="form-select" id="select-subject"></select>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button class="btn btn-primary" onclick="loadStudentMarks()">Load Students</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Enter Marks -->
+        <div class="marks-form-section" id="step3">
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="card-header" style="padding:16px 20px;">
+                    <span class="card-title" id="marks-header-text">Student Marks</span>
+                    <button class="btn btn-primary btn-sm" id="save-marks-btn" onclick="saveMarks()">Save All Marks</button>
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table" style="min-width:600px;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Adm No.</th>
+                                <th>Score (0-100)</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marks-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['teacher', 'hod', 'admin']);
+if (user) populateTopBar(user);
+
+const staffId = user ? (user.staffId || user.staff_id) : null;
+let selectedClassId = null;
+let selectedClassName = '';
+let studentsInClass = [];
+
+function showToast(msg, success = true) {
+    const t = document.getElementById('khs-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'show ' + (success ? 'success' : 'error');
+    setTimeout(() => { t.className = ''; }, 3500);
+}
+
+function gradeLabel(score) {
+    if (score >= 80) return 'A';
+    if (score >= 75) return 'A-';
+    if (score >= 70) return 'B+';
+    if (score >= 65) return 'B';
+    if (score >= 60) return 'B-';
+    if (score >= 55) return 'C+';
+    if (score >= 50) return 'C';
+    if (score >= 45) return 'C-';
+    if (score >= 40) return 'D+';
+    if (score >= 35) return 'D';
+    if (score >= 30) return 'D-';
+    return 'E';
+}
+
+function gradeCls(g) {
+    if (!g) return '';
+    const l = g[0];
+    return `grade-${l}`;
+}
+
+async function loadClasses() {
+    const list = document.getElementById('class-list');
+    if (!staffId) {
+        list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--danger);">No staff ID found in session. Please log in again.</div>';
+        return;
+    }
+
+    const classes = await apiFetch(`/api/teacher/${staffId}/classes`);
+    if (!classes || !classes.length) {
+        list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text-muted);">No classes assigned to you yet.</div>';
+        return;
+    }
+
+    list.innerHTML = classes.map(c => `
+        <div class="class-card" data-id="${c.id}" data-name="${c.name}" onclick="selectClass(${c.id}, '${c.name}', this)">
+            <div class="class-icon">&#127979;</div>
+            <div class="class-name">Form ${c.level} ${c.stream || ''}</div>
+            <div class="class-meta">${c.enrolled || 0} students &bull; ${c.assignment_role === 'CLASS_TEACHER' ? 'Class Teacher' : 'Subject Teacher'}</div>
+        </div>
+    `).join('');
+}
+
+function selectClass(classId, className, el) {
+    document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedClassId = classId;
+    selectedClassName = className;
+    document.getElementById('step2').classList.add('visible');
+    document.getElementById('step3').classList.remove('visible');
+    loadExamsAndSubjects();
+}
+
+async function loadExamsAndSubjects() {
+    const [exams, subjects] = await Promise.all([
+        apiFetch('/api/exams'),
+        apiFetch('/api/subjects')
+    ]);
+
+    const examSel = document.getElementById('select-exam');
+    examSel.innerHTML = '<option value="">-- Select Exam --</option>';
+    if (exams) {
+        exams.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id;
+            opt.textContent = e.name || `Exam ${e.id}`;
+            examSel.appendChild(opt);
+        });
+    }
+
+    const subjSel = document.getElementById('select-subject');
+    subjSel.innerHTML = '<option value="">-- Select Subject --</option>';
+    if (subjects) {
+        subjects.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            subjSel.appendChild(opt);
+        });
+    }
+}
+
+async function loadStudentMarks() {
+    const examId = document.getElementById('select-exam').value;
+    const subjectId = document.getElementById('select-subject').value;
+    if (!examId || !subjectId) { showToast('Please select both exam and subject.', false); return; }
+
+    const step3 = document.getElementById('step3');
+    step3.classList.remove('visible');
+
+    // Fetch students in this class taught by this teacher
+    const students = await apiFetch(`/api/teacher/${staffId}/students`);
+    if (!students) { showToast('Failed to load students.', false); return; }
+
+    studentsInClass = students.filter(s => s.class_id === selectedClassId);
+    if (!studentsInClass.length) {
+        showToast('No students found in this class.', false);
+        return;
+    }
+
+    // Fetch existing marks for this exam+subject
+    const existingMarks = await apiFetch(`/api/marks?exam_id=${examId}&class_id=${selectedClassId}`);
+    const marksMap = {};
+    if (existingMarks) {
+        existingMarks.forEach(m => {
+            if (String(m.subject_id) === subjectId) marksMap[m.student_id] = m;
+        });
+    }
+
+    const subjectName = document.getElementById('select-subject').selectedOptions[0].text;
+    const examName = document.getElementById('select-exam').selectedOptions[0].text;
+    document.getElementById('marks-header-text').textContent =
+        `${subjectName} — ${examName} — ${selectedClassName}`;
+
+    const tbody = document.getElementById('marks-body');
+    tbody.innerHTML = studentsInClass.map((s, i) => {
+        const existing = marksMap[s.id];
+        const score = existing ? existing.score : '';
+        const grade = existing ? existing.grade : '';
+        const remarks = existing ? (existing.remarks || '') : '';
+        return `
+            <tr>
+                <td style="color:var(--text-muted);font-size:12px;">${i + 1}</td>
+                <td style="font-weight:600;">${s.first_name} ${s.last_name}</td>
+                <td style="font-family:monospace;font-size:11px;color:var(--text-muted);">${s.admission_number || '—'}</td>
+                <td>
+                    <input type="number" class="score-input" 
+                           id="score-${s.id}" 
+                           value="${score}" 
+                           min="0" max="100" 
+                           oninput="updateGrade(${s.id})"
+                           data-student="${s.id}">
+                </td>
+                <td><span class="grade-cell ${gradeCls(grade)}" id="grade-${s.id}">${grade}</span></td>
+                <td><input type="text" class="form-input" id="remarks-${s.id}" value="${remarks}" placeholder="Optional remarks" style="min-width:140px;font-size:12px;"></td>
+            </tr>
+        `;
+    }).join('');
+
+    step3.classList.add('visible');
+}
+
+function updateGrade(studentId) {
+    const scoreInput = document.getElementById(`score-${studentId}`);
+    const gradeCell = document.getElementById(`grade-${studentId}`);
+    const val = parseFloat(scoreInput.value);
+    if (!isNaN(val) && val >= 0 && val <= 100) {
+        const g = gradeLabel(val);
+        gradeCell.textContent = g;
+        gradeCell.className = `grade-cell ${gradeCls(g)}`;
+    } else {
+        gradeCell.textContent = '—';
+        gradeCell.className = 'grade-cell';
+    }
+}
+
+async function saveMarks() {
+    const examId = parseInt(document.getElementById('select-exam').value);
+    const subjectId = parseInt(document.getElementById('select-subject').value);
+    if (!examId || !subjectId) return;
+
+    const btn = document.getElementById('save-marks-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    const marks = [];
+    studentsInClass.forEach(s => {
+        const scoreInput = document.getElementById(`score-${s.id}`);
+        const val = parseFloat(scoreInput.value);
+        if (!isNaN(val) && val >= 0 && val <= 100) {
+            const remarks = document.getElementById(`remarks-${s.id}`).value.trim() || null;
+            marks.push({
+                student_id: s.id,
+                exam_id: examId,
+                subject_id: subjectId,
+                score: val,
+                remarks
+            });
+        }
+    });
+
+    if (!marks.length) {
+        showToast('No valid marks to save. Enter scores for at least one student.', false);
+        btn.disabled = false; btn.textContent = 'Save All Marks';
+        return;
+    }
+
+    const result = await apiFetch('/api/marks', {
+        method: 'POST',
+        body: JSON.stringify({ marks }),
+    });
+
+    if (result && result.success) {
+        showToast(`Saved ${result.saved} mark(s) successfully!`, true);
+    } else {
+        showToast('Failed to save marks. Please try again.', false);
+    }
+
+    btn.disabled = false; btn.textContent = 'Save All Marks';
+}
+
+loadClasses();
+</script>
+</body>
+</html>

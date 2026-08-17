@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard – Kwale High School</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">HOD Dashboard</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">?</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Loading...</span>
+                    <span class="u-role" id="user-role">HOD</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h2 id="welcome-msg">Department Overview</h2>
+            <p>Manage your department staff and monitor subject performance</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Department Staff</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="stat-icon blue">👨‍🏫</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Subjects Offered</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-icon green">📚</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Average Performance</div>
+                    <div class="stat-value">68%</div>
+                    <div class="stat-sub">Last Exam</div>
+                </div>
+                <div class="stat-icon amber">📈</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Department Teachers</span>
+                </div>
+                <div class="task-list">
+                    <div class="task-item info">
+                        <div class="ti-icon">👨‍🏫</div>
+                        <div>
+                            <div class="ti-text">John Kamau</div>
+                            <div class="ti-sub">Mathematics</div>
+                        </div>
+                    </div>
+                    <div class="task-item info">
+                        <div class="ti-icon">👨‍🏫</div>
+                        <div>
+                            <div class="ti-text">Peter Ochieng</div>
+                            <div class="ti-sub">Physics</div>
+                        </div>
+                    </div>
+                    <div class="task-item info">
+                        <div class="ti-icon">👩‍🏫</div>
+                        <div>
+                            <div class="ti-text">Mary Wanjiru</div>
+                            <div class="ti-sub">Mathematics</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Recent Notices</span>
+                </div>
+                <div class="task-list" id="notices-list">
+                    <div class="empty-state" style="padding:20px;"><div class="es-text">Loading notices...</div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
+<script>
+const user = requireAuth(['hod', 'admin', 'principal', 'deputy_principal']);
+if (user) {
+    populateTopBar(user);
+    document.getElementById('welcome-msg').textContent = (user.department || 'Department') + ' Overview';
+}
+
+async function loadNotices() {
+    const list = document.getElementById('notices-list');
+    const notices = await apiFetch('/api/notices?audience=TEACHERS&limit=3');
+    if (!notices || !notices.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="es-text">No notices</div></div>';
+        return;
+    }
+    
+    list.innerHTML = notices.map(n => `
+        <div class="task-item ${n.is_pinned ? 'warn' : 'info'}">
+            <div class="ti-icon">${n.is_pinned ? '📌' : '📢'}</div>
+            <div>
+                <div class="ti-text">${n.title}</div>
+                <div class="ti-sub">${n.body.substring(0, 60)}...</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+loadNotices();
+</script>
+</body>
+</html>

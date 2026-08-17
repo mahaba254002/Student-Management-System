@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard – Kwale High School</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Teacher Dashboard</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">?</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Loading...</span>
+                    <span class="u-role" id="user-role">Teacher</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h2 id="welcome-msg">Welcome Back</h2>
+            <p>Here is your daily schedule and class overview</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">My Classes</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-icon blue">🏫</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-value">135</div>
+                </div>
+                <div class="stat-icon green">🎓</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Upcoming Exams</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-sub">Term 1 End Exam</div>
+                </div>
+                <div class="stat-icon amber">📝</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Today's Timetable</span>
+                </div>
+                <div class="timetable">
+                    <div class="timetable-row">
+                        <span class="tt-time">08:00</span>
+                        <span class="tt-subject">Mathematics</span>
+                        <span class="tt-class">Form 1 East</span>
+                    </div>
+                    <div class="timetable-row">
+                        <span class="tt-time">09:20</span>
+                        <span class="tt-subject">Mathematics</span>
+                        <span class="tt-class">Form 1 West</span>
+                    </div>
+                    <div class="timetable-row">
+                        <span class="tt-time">11:00</span>
+                        <span class="tt-subject">Physics</span>
+                        <span class="tt-class">Form 3 East</span>
+                    </div>
+                    <div class="empty-state" style="padding:10px;"><div class="es-text" style="color:var(--text-muted);font-weight:400;">No more classes today.</div></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Recent Notices</span>
+                </div>
+                <div class="task-list" id="notices-list">
+                    <div class="empty-state" style="padding:20px;"><div class="es-text">Loading notices...</div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
+<script>
+const user = requireAuth(['teacher', 'admin', 'principal', 'deputy_principal', 'hod']);
+if (user) {
+    populateTopBar(user);
+    document.getElementById('welcome-msg').textContent = 'Welcome Back, ' + (user.name ? user.name.split(' ')[0] : 'Teacher');
+}
+
+async function loadNotices() {
+    const list = document.getElementById('notices-list');
+    const notices = await apiFetch('/api/notices?audience=TEACHERS&limit=4');
+    if (!notices || !notices.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="es-text">No notices</div></div>';
+        return;
+    }
+    
+    list.innerHTML = notices.map(n => `
+        <div class="task-item ${n.is_pinned ? 'warn' : 'info'}">
+            <div class="ti-icon">${n.is_pinned ? '📌' : '📢'}</div>
+            <div>
+                <div class="ti-text">${n.title}</div>
+                <div class="ti-sub">${n.body.substring(0, 60)}...</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+loadNotices();
+</script>
+</body>
+</html>

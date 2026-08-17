@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Add Student</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="margin-bottom:24px;">
+            <h2>Admit New Student</h2>
+            <p>Register a new student into the system</p>
+        </div>
+
+        <form id="add-student-form">
+            <div class="card" style="max-width:800px; margin-bottom: 20px;">
+                <div class="card-header"><span class="card-title">Student Details</span></div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" class="form-input" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" class="form-input" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Middle Name</label>
+                        <input type="text" class="form-input" name="middle_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth *</label>
+                        <input type="date" class="form-input" name="date_of_birth" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Admission Number</label>
+                        <input type="text" class="form-input" name="admission_number" placeholder="Leave blank to auto-generate">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="max-width:800px; margin-bottom: 20px;">
+                <div class="card-header"><span class="card-title">Enrollment & Boarding</span></div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Class</label>
+                        <select class="form-select" name="class_id" id="class-select">
+                            <option value="">-- Select Class --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dormitory (Boarders)</label>
+                        <select class="form-select" name="dormitory_id" id="dorm-select">
+                            <option value="">-- Select Dormitory (Optional) --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="max-width:800px; display:flex; justify-content:flex-end; gap:12px;">
+                <a href="admin-students.html" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="btn-submit">Admit Student</button>
+            </div>
+        </form>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+
+async function loadDropdowns() {
+    // Classes
+    const classes = await apiFetch('/api/classes');
+    if (classes) {
+        const classSelect = document.getElementById('class-select');
+        classes.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `Form ${c.level} ${c.stream || ''}`;
+            classSelect.appendChild(opt);
+        });
+    }
+
+    // Dormitories
+    const dorms = await apiFetch('/api/dormitories');
+    if (dorms) {
+        const dormSelect = document.getElementById('dorm-select');
+        dorms.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = d.name;
+            dormSelect.appendChild(opt);
+        });
+    }
+}
+
+document.getElementById('add-student-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Convert empty strings to null where appropriate
+    if (!data.admission_number) delete data.admission_number;
+    if (!data.middle_name) delete data.middle_name;
+    if (!data.class_id) delete data.class_id;
+    if (!data.dormitory_id) delete data.dormitory_id;
+    data.gender = 'MALE'; // Boys school
+
+    try {
+        const resp = await apiFetch('/api/students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (resp && resp.id) {
+            alert('Student added successfully!');
+            window.location.href = 'admin-student-profile.html?id=' + resp.id;
+        } else {
+            alert('Error adding student. Please try again.');
+            btn.disabled = false;
+            btn.textContent = 'Admit Student';
+        }
+    } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Admit Student';
+    }
+});
+
+loadDropdowns();
+</script>
+</body>
+</html>

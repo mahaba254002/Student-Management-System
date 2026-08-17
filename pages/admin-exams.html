@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams – Kwale High School SMS</title>
+    <meta name="description" content="View and manage school examinations.">
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Examinations</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Examinations</h2>
+                <p>Manage past and upcoming school exams</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Create Exam</button>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:600px;">
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Term</th>
+                            <th>Type</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exam-table-body">
+                        <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal', 'hod', 'teacher', 'parent']);
+if (user) populateTopBar(user);
+
+// Basic fetch since exams endpoint is not yet available, we will fetch directly from a custom query if needed or just show coming soon if endpoint is missing.
+// I will create an endpoint for exams in main.py if it's missing, but let's assume it might not exist yet. 
+// I will use a placeholder or try to fetch it.
+async function loadExams() {
+    // Attempt to fetch from an endpoint we might create, or just mock data if it fails.
+    const exams = await apiFetch('/api/exams');
+    
+    const tbody = document.getElementById('exam-table-body');
+    
+    if (!exams) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--danger);">Exam endpoint not available.</td></tr>';
+        return;
+    }
+
+    if (!exams.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No exams found</td></tr>';
+        return;
+    }
+
+    const typeLabels = { 'TERM_END': 'Term End', 'MID_TERM': 'Mid Term', 'CAT': 'CAT', 'MOCK': 'Mock', 'KCSE': 'KCSE' };
+    const statusCls = { 'SCHEDULED': 'pending', 'ONGOING': 'leave', 'COMPLETED': 'active' };
+
+    tbody.innerHTML = exams.map(e => {
+        return `
+            <tr>
+                <td style="font-weight:600;color:var(--dark);">${e.name}</td>
+                <td>Term ${e.term}</td>
+                <td><span class="tag">${typeLabels[e.exam_type] || e.exam_type}</span></td>
+                <td style="font-size:12px;">${e.start_date} to ${e.end_date}</td>
+                <td><span class="badge ${statusCls[e.status] || 'active'}">${e.status}</span></td>
+                <td>
+                    <button class="btn btn-outline btn-sm">View Results</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+loadExams();
+</script>
+</body>
+</html>

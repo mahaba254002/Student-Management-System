@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .filter-bar {
+            display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .filter-bar .form-group { margin-bottom: 0; flex: 1; min-width: 200px; }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Attendance</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Attendance Logs</h2>
+                <p>View daily attendance records</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">📝 Mark Attendance</button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="form-group">
+                <select class="form-select" id="filter-class">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="date" class="form-input" id="filter-date">
+            </div>
+            <button class="btn btn-primary" onclick="loadAttendance()">Filter</button>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:600px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Adm No.</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-body">
+                        <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal', 'teacher']);
+if (user) populateTopBar(user);
+
+async function init() {
+    const classes = await apiFetch('/api/classes');
+    if (classes) {
+        const sel = document.getElementById('filter-class');
+        classes.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name;
+            sel.appendChild(opt);
+        });
+    }
+    
+    // Default to today
+    document.getElementById('filter-date').valueAsDate = new Date();
+    loadAttendance();
+}
+
+async function loadAttendance() {
+    const classId = document.getElementById('filter-class').value;
+    const date = document.getElementById('filter-date').value;
+    const tbody = document.getElementById('attendance-body');
+    
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">Loading…</td></tr>';
+    
+    let url = '/api/attendance?';
+    if (classId) url += 'class_id=' + classId + '&';
+    if (date) url += 'date=' + date;
+
+    const records = await apiFetch(url);
+    if (!records) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--danger);">Failed to load attendance</td></tr>';
+        return;
+    }
+    if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No records found for this date/class</td></tr>';
+        return;
+    }
+
+    const statusCls = {
+        'PRESENT': 'active',
+        'ABSENT': 'danger',
+        'LATE': 'warn',
+        'EXCUSED': 'leave'
+    };
+
+    tbody.innerHTML = records.map(r => `
+        <tr>
+            <td style="font-size:12px;">${r.date}</td>
+            <td style="font-weight:600;color:var(--dark);">${r.first_name} ${r.last_name}</td>
+            <td style="font-family:monospace;font-size:12px;color:var(--text-muted);">${r.admission_number || '—'}</td>
+            <td>${r.class_name}</td>
+            <td><span class="badge ${statusCls[r.status] || 'gray'}">${r.status}</span></td>
+        </tr>
+    `).join('');
+}
+
+init();
+</script>
+</body>
+</html>

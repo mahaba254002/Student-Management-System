@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text"><span>Kwale High</span><span>Head of Department</span></div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></a>
+
+        <span class="nav-section-title">My Department</span>
+        <a href="#" class="nav-item" onclick="switchView('classes', this)"><span class="nav-icon">🏫</span><span class="nav-label">My Classes</span></a>
+        <a href="#" class="nav-item" onclick="switchView('subjects', this)"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+        <a href="#" class="nav-item" onclick="switchView('exams', this)"><span class="nav-icon">📝</span><span class="nav-label">Exams</span></a>
+
+        <span class="nav-section-title">Students</span>
+        <a href="#" class="nav-item" onclick="switchView('students', this)"><span class="nav-icon">🎓</span><span class="nav-label">My Students</span></a>
+        <a href="#" class="nav-item" onclick="switchView('attendance', this)"><span class="nav-icon">📋</span><span class="nav-label">Attendance</span></a>
+
+        <span class="nav-section-title">People</span>
+        <a href="#" class="nav-item" onclick="switchView('teachers', this)"><span class="nav-icon">👨‍🏫</span><span class="nav-label">Dept Teachers</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><span class="btn-icon">🚪</span><span class="btn-label">Logout</span></button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">HOD Dashboard</span>
+        <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search…"></div>
+        <div class="topbar-actions">
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">GO</div>
+                <div class="user-info-sm"><span class="u-name" id="user-name">Ms. Grace Otieno</span><span class="u-role" id="user-role">HOD Mathematics</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <div class="page-header">
+                <h2>Mathematics Department Overview 🏫</h2>
+                <p>Manage your department's classes, subjects, exams and teachers.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchView('students')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Dept Students</div><div class="stat-value">312</div><div class="stat-sub">Across 4 streams</div></div><div class="stat-icon green">🎓</div></div>
+                <div class="stat-card" onclick="switchView('teachers')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Dept Teachers</div><div class="stat-value">12</div><div class="stat-sub">Under your dept</div></div><div class="stat-icon blue">👨‍🏫</div></div>
+                <div class="stat-card" onclick="switchView('subjects')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Subjects</div><div class="stat-value">6</div><div class="stat-sub">This department</div></div><div class="stat-icon gray">📚</div></div>
+                <div class="stat-card" onclick="switchView('exams')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Avg. Score</div><div class="stat-value">71%</div><div class="stat-sub">Last exam</div></div><div class="stat-icon amber">📝</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Quick Access</span><span class="card-badge">HOD</span></div>
+                    <div class="nav-cards">
+                        <a href="#" class="nav-card" onclick="switchView('classes')"><span class="nc-icon">🏫</span><span class="nc-label">Classes</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('subjects')"><span class="nc-icon">📚</span><span class="nc-label">Subjects</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('exams')"><span class="nc-icon">📝</span><span class="nc-label">Exams</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('students')"><span class="nc-icon">🎓</span><span class="nc-label">Students</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('attendance')"><span class="nc-icon">📋</span><span class="nc-label">Attendance</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('teachers')"><span class="nc-icon">👨‍🏫</span><span class="nc-label">Teachers</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Dept Performance</span><span class="card-badge">This Term</span></div>
+                    <div class="chart-placeholder"><span class="chart-icon">📊</span><span>Mathematics department analytics</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CLASSES -->
+        <div class="portal-view" id="view-classes"><div class="page-header"><h2>Department Classes 🏫</h2></div><div class="card"><p style="color:var(--text-muted)">Department streams.</p></div></div>
+        <!-- 3. SUBJECTS -->
+        <div class="portal-view" id="view-subjects"><div class="page-header"><h2>Department Subjects 📚</h2></div><div class="card"><p style="color:var(--text-muted)">Mathematics & Further Mathematics syllabus.</p></div></div>
+        <!-- 4. EXAMS -->
+        <div class="portal-view" id="view-exams"><div class="page-header"><h2>Department Exams 📝</h2></div><div class="card"><p style="color:var(--text-muted)">Submitted marks awaiting HOD approval.</p></div></div>
+        <!-- 5. STUDENTS -->
+        <div class="portal-view" id="view-students"><div class="page-header"><h2>Department Students 🎓</h2></div><div class="card"><p style="color:var(--text-muted)">Students taking Mathematics.</p></div></div>
+        <!-- 6. ATTENDANCE -->
+        <div class="portal-view" id="view-attendance"><div class="page-header"><h2>Attendance Log 📋</h2></div><div class="card"><p style="color:var(--text-muted)">Attendance rates per subject.</p></div></div>
+        <!-- 7. TEACHERS -->
+        <div class="portal-view" id="view-teachers"><div class="page-header"><h2>Department Teachers 👨‍🏫</h2></div><div class="card"><p style="color:var(--text-muted)">12 Mathematics teachers.</p></div></div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+    const user = requireAuth();
+    if (user && user.role !== 'hod') window.location.href = user.role + '.html';
+    if (user) { populateTopBar(user); }
+
+    function switchView(viewId, navEl) {
+        document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        if (navEl) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+        }
+        document.getElementById('topbar-page-title').textContent = viewId.replace('-', ' ').toUpperCase();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+</script>
+</body>
+</html>

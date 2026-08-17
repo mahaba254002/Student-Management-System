@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discipline – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Discipline Records</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Student Discipline</h2>
+                <p>Manage discipline cases, suspensions, and records</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Record Case</button>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:600px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Action Taken</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No discipline records found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal – Kwale High School</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Parent Portal</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">?</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Loading...</span>
+                    <span class="u-role" id="user-role">Parent</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h2 id="welcome-msg">Welcome</h2>
+            <p>View your child's academic progress, fee statements, and notices</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">My Wards</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; align-items:center; gap:14px; padding:12px; background:var(--gray-light); border-radius:var(--radius-sm); border:1px solid var(--gray-border);">
+                        <div class="avatar-lg">SM</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; color:var(--dark);">Samuel Mwangi</div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Form 3 East • KHS/2025/0045</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm">View Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Fee Summary (Term 1)</span>
+                </div>
+                <div class="info-row">
+                    <span class="ir-label">Total Billed</span>
+                    <span class="ir-value">KES 33,500</span>
+                </div>
+                <div class="info-row">
+                    <span class="ir-label">Total Paid</span>
+                    <span class="ir-value" style="color:var(--green-dark)">KES 33,500</span>
+                </div>
+                <div class="info-row" style="border:none; padding-top:14px; margin-top:8px; border-top:1px solid var(--gray-border);">
+                    <span class="ir-label" style="font-weight:700; color:var(--dark);">Current Balance</span>
+                    <span class="ir-value" style="color:var(--green-dark); font-size:18px;">KES 0</span>
+                </div>
+                <div style="margin-top:16px;">
+                    <button class="btn btn-outline" style="width:100%; justify-content:center;">View Statement</button>
+                </div>
+            </div>
+            
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-header">
+                    <span class="card-title">School Notices</span>
+                </div>
+                <div class="task-list" id="notices-list">
+                    <div class="empty-state" style="padding:20px;"><div class="es-text">Loading notices...</div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
+<script>
+const user = requireAuth(['parent', 'admin']);
+if (user) {
+    populateTopBar(user);
+    document.getElementById('welcome-msg').textContent = 'Welcome, ' + (user.name || 'Parent');
+}
+
+async function loadNotices() {
+    const list = document.getElementById('notices-list');
+    const notices = await apiFetch('/api/notices?audience=PARENTS&limit=3');
+    if (!notices || !notices.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="es-text">No notices</div></div>';
+        return;
+    }
+    
+    list.innerHTML = notices.map(n => `
+        <div class="task-item ${n.is_pinned ? 'warn' : 'info'}">
+            <div class="ti-icon">${n.is_pinned ? '📌' : '📢'}</div>
+            <div>
+                <div class="ti-text">${n.title}</div>
+                <div class="ti-sub">${n.body}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+loadNotices();
+</script>
+</body>
+</html>

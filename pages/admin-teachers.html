@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Teachers | Kwale High School</title>
+
+    <link rel="stylesheet" href="../dashboard.css">
+
+    <style>
+        /* =========================================
+           PAGE HEADER
+        ========================================= */
+
+        .page-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header-row h2 {
+            margin: 0 0 6px;
+            font-size: 24px;
+            color: var(--dark);
+        }
+
+        .page-header-row p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+
+        /* =========================================
+           BUTTONS
+        ========================================= */
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            min-height: 42px;
+            padding: 10px 16px;
+
+            border: none;
+            border-radius: var(--radius-sm);
+
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+            border: 1px solid var(--gray-border);
+        }
+
+
+        /* =========================================
+           SUMMARY
+        ========================================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            padding: 18px;
+            background: var(--white);
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+        }
+
+        .summary-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+
+        /* =========================================
+           FILTERS
+        ========================================= */
+
+        .filters-card {
+            display: flex;
+            gap: 12px;
+
+            padding: 16px;
+            margin-bottom: 20px;
+
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+        }
+
+        .search-input,
+        .filter-select {
+            min-height: 42px;
+
+            padding: 10px 14px;
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            background: var(--white);
+
+            font-family: inherit;
+            font-size: 16px;
+
+            outline: none;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .filter-select {
+            min-width: 170px;
+        }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: var(--green);
+        }
+
+
+        /* =========================================
+           TEACHERS TABLE
+        ========================================= */
+
+        .teachers-card {
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .teachers-table {
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+        }
+
+        .teachers-table th {
+            padding: 14px 18px;
+
+            background: var(--gray-light);
+
+            text-align: left;
+
+            color: var(--text-muted);
+
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .teachers-table td {
+            padding: 16px 18px;
+
+            border-top: 1px solid var(--gray-border);
+
+            font-size: 13px;
+            color: var(--dark);
+        }
+
+
+        /* =========================================
+           TEACHER PROFILE
+        ========================================= */
+
+        .teacher-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .teacher-avatar {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            background: var(--green-light);
+            color: var(--green);
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .teacher-name {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 700;
+        }
+
+        .teacher-email {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+
+        /* =========================================
+           BADGES
+        ========================================= */
+
+        .department-badge,
+        .status-badge,
+        .class-teacher-badge {
+            display: inline-flex;
+            align-items: center;
+
+            padding: 5px 10px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .department-science {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .department-humanities {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .department-languages {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+
+        .department-technical {
+            background: #fefce8;
+            color: #a16207;
+        }
+
+        .department-other {
+            background: var(--gray-light);
+            color: var(--text-muted);
+        }
+
+        .status-active {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .status-inactive {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .class-teacher-yes {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .class-teacher-no {
+            background: var(--gray-light);
+            color: var(--text-muted);
+        }
+
+
+        /* =========================================
+           ACTIONS
+        ========================================= */
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            min-height: 34px;
+            padding: 6px 10px;
+
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+
+        /* =========================================
+           EMPTY STATE
+        ========================================= */
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            margin-bottom: 12px;
+            font-size: 40px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: var(--dark);
+        }
+
+
+        /* =========================================
+           MODAL
+        ========================================= */
+
+        .modal-overlay {
+            display: none;
+
+            position: fixed;
+            inset: 0;
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 700px;
+
+            max-height: 90vh;
+            overflow-y: auto;
+
+            background: var(--white);
+
+            border-radius: var(--radius);
+
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 20px;
+
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: var(--gray-light);
+
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+
+        /* =========================================
+           FORM
+        ========================================= */
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .form-section-title {
+            margin-bottom: 16px;
+
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+
+            padding-bottom: 8px;
+
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 44px;
+
+            padding: 10px 12px;
+
+            box-sizing: border-box;
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            background: var(--white);
+
+            font-family: inherit;
+            font-size: 16px;
+
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--green);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+
+            margin-top: 24px;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 900px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 768px) {
+
+            .page-header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-header-row h2 {
+                font-size: 20px;
+            }
+
+            .page-header-row .btn {
+                width: 100%;
+            }
+
+            .filters-card {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .modal-overlay {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .modal {
+                max-width: none;
+                max-height: 92vh;
+
+                border-radius:
+                    var(--radius) var(--radius) 0 0;
+            }
+
+        }
+
+        @media (max-width: 480px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 16px;
+            }
+
+            .modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
+            }
+
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+
+    <div class="sidebar-overlay" id="sidebar-overlay">
+    </div>
+
+
+
+    <!-- =========================================
+     SIDEBAR
+========================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-badge">
+                KHS
+            </div>
+
+            <div class="logo-text">
+
+                <span>Kwale High</span>
+                <span>Admin Portal</span>
+
+            </div>
+
+            <button class="sidebar-close" id="sidebar-close">
+
+                ✕
+
+            </button>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <span class="nav-section-title">Main</span>
+
+            <a href="admin.html" class="nav-item">
+
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Dashboard</span>
+
+            </a>
+
+
+            <span class="nav-section-title">Students</span>
+
+            <a href="admin-students.html" class="nav-item">
+
+                <span class="nav-icon">🎓</span>
+                <span class="nav-label">All Students</span>
+
+            </a>
+
+            <a href="admin-add-student.html" class="nav-item">
+
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">Add New Student</span>
+
+            </a>
+
+
+            <span class="nav-section-title">Academic</span>
+
+            <a href="admin-classes.html" class="nav-item">
+
+                <span class="nav-icon">🏫</span>
+                <span class="nav-label">Classes</span>
+
+            </a>
+
+            <a href="admin-subjects.html" class="nav-item">
+
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Subjects</span>
+
+            </a>
+
+            <a href="admin-teachers.html" class="nav-item active">
+
+                <span class="nav-icon">👨‍🏫</span>
+                <span class="nav-label">Teachers</span>
+
+            </a>
+
+            <a href="admin-exams.html" class="nav-item">
+
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">Exams</span>
+
+            </a>
+
+
+            <span class="nav-section-title">School</span>
+
+            <a href="admin-academic-years.html" class="nav-item">
+
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Academic Years</span>
+
+            </a>
+
+            <a href="admin-dormitories.html" class="nav-item">
+
+                <span class="nav-icon">🛏️</span>
+                <span class="nav-label">Dormitories</span>
+
+            </a>
+
+            <a href="admin-schools.html" class="nav-item">
+
+                <span class="nav-icon">🏛️</span>
+                <span class="nav-label">Previous Schools</span>
+
+            </a>
+
+
+            <span class="nav-section-title">System</span>
+
+            <a href="admin-users.html" class="nav-item">
+
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Users</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <button class="logout-btn" onclick="logout()">
+
+                <span class="btn-icon">🚪</span>
+                <span class="btn-label">Logout</span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================================
+     MAIN CONTENT
+========================================= -->
+
+    <div class="main-wrapper" id="main-wrapper">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button class="topbar-toggle" id="sidebar-toggle">
+
+                ☰
+
+            </button>
+
+
+            <span class="topbar-title">
+                Teachers
+            </span>
+
+
+            <div class="topbar-actions">
+
+                <div class="user-pill">
+
+                    <div class="user-avatar-sm" id="user-avatar">
+
+                        AD
+
+                    </div>
+
+                    <div class="user-info-sm">
+
+                        <span class="u-name" id="user-name">
+
+                            Admin
+
+                        </span>
+
+                        <span class="u-role" id="user-role">
+
+                            Administrator
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- PAGE -->
+
+        <main class="page-content">
+
+
+            <!-- HEADER -->
+
+            <div class="page-header-row">
+
+                <div>
+
+                    <h2>
+                        Teachers 👨‍🏫
+                    </h2>
+
+                    <p>
+                        Manage teacher profiles and academic responsibilities.
+                    </p>
+
+                </div>
+
+
+                <button class="btn btn-primary" id="add-teacher-btn">
+
+                    ➕ Add Teacher
+
+                </button>
+
+            </div>
+
+
+
+            <!-- SUMMARY -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Total Teachers
+                    </span>
+
+                    <strong class="summary-value" id="total-teachers">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Active Teachers
+                    </span>
+
+                    <strong class="summary-value" id="active-teachers">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Class Teachers
+                    </span>
+
+                    <strong class="summary-value" id="class-teachers">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Departments
+                    </span>
+
+                    <strong class="summary-value" id="total-departments">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- FILTERS -->
+
+            <section class="filters-card">
+
+                <input type="text" class="search-input" id="teacher-search"
+                    placeholder="🔍 Search teacher name or employee number...">
+
+
+                <select class="filter-select" id="department-filter">
+
+                    <option value="">
+                        All Departments
+                    </option>
+
+                    <option value="science">
+                        Science
+                    </option>
+
+                    <option value="humanities">
+                        Humanities
+                    </option>
+
+                    <option value="languages">
+                        Languages
+                    </option>
+
+                    <option value="technical">
+                        Technical
+                    </option>
+
+                    <option value="other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <select class="filter-select" id="status-filter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="inactive">
+                        Inactive
+                    </option>
+
+                </select>
+
+            </section>
+
+
+
+            <!-- TEACHERS TABLE -->
+
+            <section class="teachers-card">
+
+                <div class="table-wrapper">
+
+                    <table class="teachers-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Teacher</th>
+                                <th>Employee No.</th>
+                                <th>Department</th>
+                                <th>Position</th>
+                                <th>Class Teacher</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="teachers-body">
+
+                            <tr>
+
+                                <td colspan="7">
+
+                                    <div class="empty-state">
+
+                                        <div class="empty-icon">
+                                            👨‍🏫
+                                        </div>
+
+                                        <h3>
+                                            No Teachers Found
+                                        </h3>
+
+                                        <p>
+                                            Add teachers to start managing academic assignments.
+                                        </p>
+
+                                        <br>
+
+                                        <button class="btn btn-primary" onclick="openAddTeacherModal()">
+
+                                            ➕ Add First Teacher
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- =========================================
+     ADD TEACHER MODAL
+========================================= -->
+
+    <div class="modal-overlay" id="teacher-modal">
+
+
+        <div class="modal">
+
+
+            <div class="modal-header">
+
+                <h3 id="modal-title">
+                    Add Teacher
+                </h3>
+
+                <button class="modal-close" id="modal-close">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+
+            <form id="teacher-form">
+
+
+                <div class="modal-body">
+
+
+                    <input type="hidden" id="teacher-id">
+
+
+                    <!-- =====================================
+                     PERSONAL INFORMATION
+                ====================================== -->
+
+                    <div class="form-section">
+
+                        <div class="form-section-title">
+
+                            Personal Information
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="first-name">
+                                    First Name
+                                </label>
+
+                                <input type="text" id="first-name" class="form-control" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="last-name">
+                                    Last Name
+                                </label>
+
+                                <input type="text" id="last-name" class="form-control" required>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="teacher-email">
+                                    Email Address
+                                </label>
+
+                                <input type="email" id="teacher-email" class="form-control" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="teacher-phone">
+                                    Phone Number
+                                </label>
+
+                                <input type="tel" id="teacher-phone" class="form-control"
+                                    placeholder="+254 7XX XXX XXX">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                     EMPLOYMENT INFORMATION
+                ====================================== -->
+
+                    <div class="form-section">
+
+                        <div class="form-section-title">
+
+                            Employment Information
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="employee-number">
+                                    Employee Number
+                                </label>
+
+                                <input type="text" id="employee-number" class="form-control"
+                                    placeholder="Example: KHS-T-001" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="employment-date">
+                                    Employment Date
+                                </label>
+
+                                <input type="date" id="employment-date" class="form-control">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="department">
+                                    Department
+                                </label>
+
+                                <select id="department" class="form-control" required>
+
+                                    <option value="">
+                                        Select Department
+                                    </option>
+
+                                    <option value="science">
+                                        Science
+                                    </option>
+
+                                    <option value="humanities">
+                                        Humanities
+                                    </option>
+
+                                    <option value="languages">
+                                        Languages
+                                    </option>
+
+                                    <option value="technical">
+                                        Technical
+                                    </option>
+
+                                    <option value="other">
+                                        Other
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="position">
+                                    Position
+                                </label>
+
+                                <select id="position" class="form-control">
+
+                                    <option value="teacher">
+                                        Teacher
+                                    </option>
+
+                                    <option value="hod">
+                                        Head of Department
+                                    </option>
+
+                                    <option value="deputy_principal">
+                                        Deputy Principal
+                                    </option>
+
+                                    <option value="principal">
+                                        Principal
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                     SYSTEM ACCOUNT
+                ====================================== -->
+
+                    <div class="form-section">
+
+                        <div class="form-section-title">
+
+                            System Account
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="system-user">
+
+                                Link System User
+
+                            </label>
+
+                            <select id="system-user" class="form-control">
+
+                                <option value="">
+                                    Create teacher without login account
+                                </option>
+
+                                <!--
+                                Later populated from:
+
+                                GET /users?role=teacher
+                            -->
+
+                            </select>
+
+                        </div>
+
+
+                        <p style="
+                        margin-top: -8px;
+                        font-size: 12px;
+                        color: var(--text-muted);
+                    ">
+
+                            A teacher can exist in the school records
+                            without having access to the system.
+
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                     STATUS
+                ====================================== -->
+
+                    <div class="form-section">
+
+                        <div class="form-section-title">
+
+                            Account Status
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="teacher-status">
+
+                                Teacher Status
+
+                            </label>
+
+                            <select id="teacher-status" class="form-control">
+
+                                <option value="active">
+                                    Active
+                                </option>
+
+                                <option value="inactive">
+                                    Inactive
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="modal-actions">
+
+                        <button type="button" class="btn btn-secondary" id="cancel-modal-btn">
+
+                            Cancel
+
+                        </button>
+
+
+                        <button type="submit" class="btn btn-primary">
+
+                            💾 Save Teacher
+
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+    <script src="../auth.js"></script>
+
+    <script src="../dashboard.js"></script>
+
+
+    <script>
+
+        /* =========================================
+           AUTH
+        ========================================= */
+
+        const user = requireAuth();
+
+
+        if (user && user.role !== "admin") {
+
+            window.location.href =
+                user.role + ".html";
+
+        }
+
+
+        if (user) {
+
+            populateTopBar(user);
+
+        }
+
+
+
+        /* =========================================
+           MODAL
+        ========================================= */
+
+        const teacherModal =
+            document.getElementById("teacher-modal");
+
+
+        const addTeacherBtn =
+            document.getElementById("add-teacher-btn");
+
+
+        const modalClose =
+            document.getElementById("modal-close");
+
+
+        const cancelModalBtn =
+            document.getElementById("cancel-modal-btn");
+
+
+
+        function openAddTeacherModal() {
+
+            document
+                .getElementById("modal-title")
+                .textContent =
+                "Add Teacher";
+
+
+            document
+                .getElementById("teacher-form")
+                .reset();
+
+
+            document
+                .getElementById("teacher-id")
+                .value = "";
+
+
+            teacherModal.classList.add("open");
+
+        }
+
+
+
+        function closeTeacherModal() {
+
+            teacherModal.classList.remove("open");
+
+        }
+
+
+
+        addTeacherBtn.addEventListener(
+            "click",
+            openAddTeacherModal
+        );
+
+
+        modalClose.addEventListener(
+            "click",
+            closeTeacherModal
+        );
+
+
+        cancelModalBtn.addEventListener(
+            "click",
+            closeTeacherModal
+        );
+
+
+        teacherModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (event.target === teacherModal) {
+
+                    closeTeacherModal();
+
+                }
+
+            }
+        );
+
+
+
+        /* =========================================
+           SAVE TEACHER
+    
+           FRONTEND PLACEHOLDER
+    
+           Later connected to FastAPI:
+    
+           POST /teachers
+        ========================================= */
+
+        document
+            .getElementById("teacher-form")
+            .addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    const teacherData = {
+
+                        first_name:
+                            document
+                                .getElementById("first-name")
+                                .value,
+
+                        last_name:
+                            document
+                                .getElementById("last-name")
+                                .value,
+
+                        email:
+                            document
+                                .getElementById("teacher-email")
+                                .value,
+
+                        phone:
+                            document
+                                .getElementById("teacher-phone")
+                                .value,
+
+                        employee_number:
+                            document
+                                .getElementById("employee-number")
+                                .value,
+
+                        employment_date:
+                            document
+                                .getElementById("employment-date")
+                                .value,
+
+                        department:
+                            document
+                                .getElementById("department")
+                                .value,
+
+                        position:
+                            document
+                                .getElementById("position")
+                                .value,
+
+                        user_id:
+                            document
+                                .getElementById("system-user")
+                                .value || null,
+
+                        status:
+                            document
+                                .getElementById("teacher-status")
+                                .value
+
+                    };
+
+
+                    console.log(teacherData);
+
+
+                    /*
+                    =========================================
+    
+                    FUTURE FASTAPI
+    
+                    POST /teachers
+    
+                    {
+                        "first_name": "...",
+                        "last_name": "...",
+                        "email": "...",
+                        "phone": "...",
+                        "employee_number": "...",
+                        "employment_date": "...",
+                        "department": "...",
+                        "position": "...",
+                        "user_id": 1,
+                        "is_active": true
+                    }
+    
+                    =========================================
+                    */
+
+
+                    alert(
+                        "Teacher saved successfully!"
+                    );
+
+
+                    closeTeacherModal();
+
+                }
+            );
+
+
+
+        /* =========================================
+           SEARCH PLACEHOLDER
+        ========================================= */
+
+        document
+            .getElementById("teacher-search")
+            .addEventListener(
+                "input",
+                function () {
+
+                    console.log(
+                        "Searching:",
+                        this.value
+                    );
+
+                }
+            );
+
+    </script>
+
+
+</body>
+
+</html>

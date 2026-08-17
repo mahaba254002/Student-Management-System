@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">School Timetable</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Master Timetable</h2>
+                <p>View and manage the academic timetable</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Generate Timetable</button>
+        </div>
+
+        <div class="card" style="padding:40px; text-align:center;">
+            <div style="font-size:40px; margin-bottom:16px;">📅</div>
+            <h3 style="margin-bottom:8px;">Timetable not yet configured</h3>
+            <p style="color:var(--text-muted); max-width:400px; margin:0 auto 20px;">The master timetable has not been generated for the current term yet.</p>
+            <button class="btn btn-outline" style="margin:0 auto;" onclick="alert('Feature coming soon')">Setup Now</button>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+</script>
+</body>
+</html>

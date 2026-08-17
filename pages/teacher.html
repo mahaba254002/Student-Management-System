@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        /* ── Teacher page extras ─────────────────────── */
+        .greeting-card {
+            background: linear-gradient(135deg, var(--green-dark), var(--green));
+            border-radius: var(--radius);
+            padding: 22px 26px;
+            color: var(--white);
+            margin-bottom: 22px;
+            display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+        }
+        .greeting-card .gc-avatar {
+            width: 58px; height: 58px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700;
+            border: 2px solid rgba(255,255,255,0.4);
+            flex-shrink: 0;
+        }
+        .greeting-card .gc-info h2 { font-size: 19px; font-weight: 700; }
+        .greeting-card .gc-info p  { font-size: 13px; opacity: 0.8; margin-top: 3px; }
+        .greeting-card .gc-info .gc-badges { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .gc-badge {
+            padding: 3px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+            background: rgba(255,255,255,0.18); color: #fff;
+        }
+        .gc-time { margin-left: auto; text-align: right; }
+        .gc-time .time-val { font-size: 26px; font-weight: 700; }
+        .gc-time .time-label { font-size: 11px; opacity: 0.7; }
+
+        /* Views management */
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+
+        /* Attendance pill selectors */
+        .attend-options { display: flex; gap: 6px; }
+        .attend-btn {
+            padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--gray-border); background: var(--white); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .attend-btn.p-btn.active { background: var(--green-light); color: var(--green-dark); border-color: var(--green); }
+        .attend-btn.a-btn.active { background: #fde8e8; color: #b91c1c; border-color: #f87171; }
+        .attend-btn.l-btn.active { background: #fef9e7; color: #d97706; border-color: #fbbf24; }
+
+        /* Subject cards */
+        .subject-card {
+            background: var(--white); border-radius: var(--radius);
+            border: 1px solid var(--gray-border); padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: var(--shadow-sm); transition: transform 0.2s;
+        }
+        .subject-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        @media (max-width: 768px) {
+            .greeting-card { flex-direction: column; align-items: flex-start; }
+            .gc-time { margin-left: 0; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Add Student Request Drawer -->
+<div class="drawer-overlay" id="request-student-overlay" onclick="KHS.closeDrawer('request-student-drawer','request-student-overlay')"></div>
+<div class="drawer" id="request-student-drawer">
+    <div class="drawer-header">
+        <span class="drawer-title">Request Student Addition</span>
+        <button class="drawer-close" onclick="KHS.closeDrawer('request-student-drawer','request-student-overlay')">✕</button>
+    </div>
+    <div class="drawer-body">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px;border-radius:8px;font-size:12px;margin-bottom:16px">
+            ℹ️ <strong>Admin Approval Required:</strong> Adding a new student submits a request to the school administrator for verification and admission number assignment.
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">First Name *</label>
+                <input class="form-input" type="text" placeholder="e.g. Ali" id="req-fname">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name *</label>
+                <input class="form-input" type="text" placeholder="e.g. Mwangi" id="req-lname">
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Gender *</label>
+                <select class="form-select" id="req-gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Requested Class *</label>
+                <input class="form-input" type="text" value="Form 3 North" readonly id="req-class">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Parent / Guardian Name *</label>
+            <input class="form-input" type="text" placeholder="e.g. Mary Mwangi" id="req-parent">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Parent Phone *</label>
+            <input class="form-input" type="tel" placeholder="+254 7..." id="req-phone">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Reason / Notes</label>
+            <textarea class="form-input" rows="3" placeholder="Transfer from previous school, late registration, etc." id="req-notes"></textarea>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-primary" onclick="submitStudentRequest()" style="flex:1">📩 Submit Request to Admin</button>
+        <button class="btn btn-outline" onclick="KHS.closeDrawer('request-student-drawer','request-student-overlay')">Cancel</button>
+    </div>
+</div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text">
+            <span>Kwale High</span>
+            <span id="sidebar-subtitle">Teacher Portal</span>
+        </div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)">
+            <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('profile', this)">
+            <span class="nav-icon">👤</span><span class="nav-label">My Profile</span>
+        </a>
+
+        <span class="nav-section-title">My Teaching</span>
+        <a href="#" class="nav-item" onclick="switchView('subjects', this)">
+            <span class="nav-icon">📚</span><span class="nav-label">My Subjects</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('classes', this)">
+            <span class="nav-icon">🏫</span><span class="nav-label">My Classes</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('results', this)">
+            <span class="nav-icon">📝</span><span class="nav-label">Subject Results</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('performance', this)">
+            <span class="nav-icon">📊</span><span class="nav-label">Student Performance</span>
+        </a>
+
+        <!-- Class Teacher section — shown if isClassTeacher -->
+        <div id="ct-nav-section" style="display:none">
+            <span class="nav-section-title" id="ct-nav-label">Class Teacher</span>
+            <a href="#" class="nav-item" onclick="switchView('myclass', this)">
+                <span class="nav-icon">🏷️</span><span class="nav-label">My Class</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchView('attendance', this)">
+                <span class="nav-icon">📋</span><span class="nav-label">Attendance</span>
+                <span class="nav-badge" id="attend-badge" style="display:none">!</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchView('class-performance', this)">
+                <span class="nav-icon">📈</span><span class="nav-label">Class Performance</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchView('students', this)">
+                <span class="nav-icon">🎓</span><span class="nav-label">My Students</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchView('requests', this)">
+                <span class="nav-icon">📩</span><span class="nav-label">Student Requests</span>
+                <span class="nav-badge" id="req-badge" style="display:none">2</span>
+            </a>
+        </div>
+
+        <span class="nav-section-title">More</span>
+        <a href="#" class="nav-item" onclick="switchView('announcements', this)">
+            <span class="nav-icon">📢</span><span class="nav-label">Announcements</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('notifications', this)">
+            <span class="nav-icon">🔔</span><span class="nav-label">Notifications</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('settings', this)">
+            <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <span class="btn-icon">🚪</span><span class="btn-label">Logout</span>
+        </button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">Dashboard</span>
+        <div class="topbar-search">
+            <span>🔍</span>
+            <input type="text" placeholder="Search students…">
+        </div>
+        <div class="topbar-actions">
+            <button class="icon-btn" onclick="switchView('notifications')">🔔<span class="notif-dot"></span></button>
+            <div class="user-pill" onclick="switchView('profile')">
+                <div class="user-avatar-sm" id="user-avatar">DN</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Teacher</span>
+                    <span class="u-role" id="user-role">Teacher</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <!-- Hero -->
+            <div class="greeting-card">
+                <div class="gc-avatar" id="gc-av">DN</div>
+                <div class="gc-info">
+                    <h2><span id="greeting-txt">Good day</span>, <span id="teacher-full-name">Mr. David Njoroge</span> 👋</h2>
+                    <p id="teacher-subtitle">Sciences Department • T024</p>
+                    <div class="gc-badges" id="hero-badges"></div>
+                </div>
+                <div class="gc-time">
+                    <div class="time-val" id="live-clock">--:--</div>
+                    <div class="time-label" id="live-date">Today</div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="dash-stats"></div>
+
+            <div class="content-grid">
+                <!-- Today's Timetable -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Today's Schedule</span>
+                        <span class="card-badge" id="sched-badge">Today</span>
+                    </div>
+                    <div class="timetable" id="timetable-list"></div>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Quick Access</span>
+                        <span class="card-badge">Teacher</span>
+                    </div>
+                    <div class="nav-cards" id="quick-nav-cards"></div>
+                </div>
+
+                <!-- Tasks (if class teacher) -->
+                <div style="grid-column:1/-1" id="dash-tasks-container"></div>
+
+                <!-- Performance Chart -->
+                <div class="card" style="grid-column:1/-1">
+                    <div class="card-header">
+                        <span class="card-title">Subject Performance Overview</span>
+                        <span class="card-badge">This Term</span>
+                    </div>
+                    <div class="chart-placeholder">
+                        <span class="chart-icon">📊</span>
+                        <span>Mathematics & Physics averages across classes</span>
+                        <span style="font-size:11px;opacity:0.6">Form 3 North: 82% | Form 3 South: 76% | Form 2 South: 69%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. MY PROFILE VIEW -->
+        <div class="portal-view" id="view-profile">
+            <div class="page-header">
+                <h2>My Profile 👤</h2>
+                <p>Your official employment record and teaching responsibilities</p>
+            </div>
+            <div class="content-grid">
+                <div class="card">
+                    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gray-border)">
+                        <div style="width:64px;height:64px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">DN</div>
+                        <div>
+                            <h3 style="font-size:18px;font-weight:700">Mr. David Njoroge</h3>
+                            <p style="font-size:13px;color:var(--text-muted)">Sciences Department • Employee No: T024</p>
+                            <span class="badge active" style="margin-top:4px">Active Staff</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input class="form-input" type="text" value="+254 712 345 678" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input class="form-input" type="text" value="d.njoroge@kwalehigh.ac.ke" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">National ID Number</label>
+                        <input class="form-input" type="text" value="29834561" readonly>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">Teaching Responsibilities</h3>
+                    <div class="form-group">
+                        <label class="form-label">Assigned Subjects</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <span class="badge active">Mathematics</span>
+                            <span class="badge active">Physics</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assigned Classes</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <span class="badge" style="background:#e8f0fe;color:#2563eb">Form 3 North</span>
+                            <span class="badge" style="background:#e8f0fe;color:#2563eb">Form 3 South</span>
+                            <span class="badge" style="background:#e8f0fe;color:#2563eb">Form 2 South</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Class Teacher Role</label>
+                        <div>
+                            <span class="badge active">✓ Form 3 North (42 Students)</span>
+                        </div>
+                    </div>
+                    <div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:12px;border-radius:8px;font-size:12px;margin-top:16px">
+                        ℹ️ <strong>System Managed:</strong> Employee number, assigned subjects, and class teacher assignments can only be edited by the School Admin.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MY SUBJECTS VIEW -->
+        <div class="portal-view" id="view-subjects">
+            <div class="page-header">
+                <h2>My Subjects 📚</h2>
+                <p>Curriculum coverage and classes taught per subject</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:20px">
+                <div class="subject-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <h3 style="font-size:18px;font-weight:700">Mathematics</h3>
+                        <span class="card-badge">2 Classes</span>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-muted)">Taught in Form 3 North & Form 3 South</p>
+                    <div style="background:var(--gray-light);padding:12px;border-radius:8px;font-size:12px">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                            <span>Syllabus Coverage</span>
+                            <strong>75%</strong>
+                        </div>
+                        <div style="height:6px;background:var(--gray-border);border-radius:3px;overflow:hidden">
+                            <div style="width:75%;height:100%;background:var(--green)"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:6px">
+                        <button class="btn btn-primary btn-sm" onclick="switchView('results')">📝 Enter Marks</button>
+                        <button class="btn btn-outline btn-sm" onclick="switchView('performance')">📊 View Scores</button>
+                    </div>
+                </div>
+
+                <div class="subject-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <h3 style="font-size:18px;font-weight:700">Physics</h3>
+                        <span class="card-badge">1 Class</span>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-muted)">Taught in Form 2 South</p>
+                    <div style="background:var(--gray-light);padding:12px;border-radius:8px;font-size:12px">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                            <span>Syllabus Coverage</span>
+                            <strong>68%</strong>
+                        </div>
+                        <div style="height:6px;background:var(--gray-border);border-radius:3px;overflow:hidden">
+                            <div style="width:68%;height:100%;background:var(--green)"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:6px">
+                        <button class="btn btn-primary btn-sm" onclick="switchView('results')">📝 Enter Marks</button>
+                        <button class="btn btn-outline btn-sm" onclick="switchView('performance')">📊 View Scores</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MY CLASSES VIEW -->
+        <div class="portal-view" id="view-classes">
+            <div class="page-header">
+                <h2>My Classes 🏫</h2>
+                <p>Classes where you are Class Teacher vs Subject Teacher</p>
+            </div>
+            <div style="margin-bottom:20px">
+                <h3 style="font-size:14px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px">Class Teacher Assignment</h3>
+                <div class="card" style="border-left:4px solid var(--green)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+                        <div>
+                            <h3 style="font-size:17px;font-weight:700">Form 3 North</h3>
+                            <p style="font-size:13px;color:var(--text-muted)">42 Enrolled Students • Stream: Main</p>
+                        </div>
+                        <div style="display:flex;gap:10px">
+                            <button class="btn btn-primary btn-sm" onclick="switchView('myclass')">🏷️ Open Class Hub</button>
+                            <button class="btn btn-outline btn-sm" onclick="switchView('attendance')">📋 Attendance</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size:14px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px">Subject Teaching Classes</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
+                    <div class="card">
+                        <h4 style="font-size:16px;font-weight:700">Form 3 South</h4>
+                        <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px">Subject: Mathematics (39 Students)</p>
+                        <button class="btn btn-outline btn-sm" onclick="switchView('results')">📝 Enter Marks</button>
+                    </div>
+                    <div class="card">
+                        <h4 style="font-size:16px;font-weight:700">Form 2 South</h4>
+                        <p style="font-size:12px;color:var(--text-muted);margin:4px 0 12px">Subject: Physics (45 Students)</p>
+                        <button class="btn btn-outline btn-sm" onclick="switchView('results')">📝 Enter Marks</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. SUBJECT RESULTS / ENTER MARKS VIEW -->
+        <div class="portal-view" id="view-results">
+            <div class="page-header">
+                <h2>Enter Subject Marks 📝</h2>
+                <p>Input student scores and submit to HOD for approval</p>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <select class="form-select">
+                            <option>Mathematics</option>
+                            <option>Physics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Class Stream</label>
+                        <select class="form-select">
+                            <option>Form 3 North</option>
+                            <option>Form 3 South</option>
+                            <option>Form 2 South</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <span class="card-title">Form 3 North – Mathematics (Term 2 Exam)</span>
+                    <span class="badge pending">Status: Draft</span>
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Adm No</th>
+                                <th>Student Name</th>
+                                <th>Mid-Term (30)</th>
+                                <th>End-Term (70)</th>
+                                <th>Total (100)</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>KHS/0301</td>
+                                <td>Ali Hassan</td>
+                                <td><input type="number" value="26" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><input type="number" value="62" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><strong>88</strong></td>
+                                <td><span class="badge active">A</span></td>
+                            </tr>
+                            <tr>
+                                <td>KHS/0302</td>
+                                <td>John Mwangi</td>
+                                <td><input type="number" value="24" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><input type="number" value="58" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><strong>82</strong></td>
+                                <td><span class="badge active">A-</span></td>
+                            </tr>
+                            <tr>
+                                <td>KHS/0303</td>
+                                <td>Amina Salim</td>
+                                <td><input type="number" value="22" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><input type="number" value="53" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><strong>75</strong></td>
+                                <td><span class="badge active">B+</span></td>
+                            </tr>
+                            <tr>
+                                <td>KHS/0304</td>
+                                <td>Mary Omar</td>
+                                <td><input type="number" value="18" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><input type="number" value="44" class="form-input" style="width:70px;padding:4px 8px"></td>
+                                <td><strong>62</strong></td>
+                                <td><span class="badge" style="background:#e8f0fe;color:#2563eb">B-</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
+                    <button class="btn btn-outline" onclick="alert('💾 Draft saved locally!')">Save Draft</button>
+                    <button class="btn btn-primary" onclick="alert('✅ Marks submitted to HOD for approval!')">📩 Submit to HOD</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. STUDENT PERFORMANCE VIEW -->
+        <div class="portal-view" id="view-performance">
+            <div class="page-header">
+                <h2>Student Performance 📊</h2>
+                <p>Analytics for your subjects across assigned classes</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Mathematics Avg</div>
+                        <div class="stat-value">79.2%</div>
+                        <div class="stat-sub">↑ 4% this term</div>
+                    </div>
+                    <div class="stat-icon green">📈</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Physics Avg</div>
+                        <div class="stat-value">69.5%</div>
+                        <div class="stat-sub">↑ 2% this term</div>
+                    </div>
+                    <div class="stat-icon blue">⚡</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Pass Rate</div>
+                        <div class="stat-value">94.8%</div>
+                        <div class="stat-sub">Target: 95%</div>
+                    </div>
+                    <div class="stat-icon amber">🎯</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. MY CLASS (CLASS TEACHER HUB) VIEW -->
+        <div class="portal-view" id="view-myclass">
+            <div class="page-header">
+                <h2>My Class – Form 3 North 🏷️</h2>
+                <p>Main class management area for Mr. David Njoroge (Class Teacher)</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Enrolled Students</div>
+                        <div class="stat-value">42</div>
+                        <div class="stat-sub">22 Boys, 20 Girls</div>
+                    </div>
+                    <div class="stat-icon green">🎓</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Attendance Rate</div>
+                        <div class="stat-value">94.2%</div>
+                        <div class="stat-sub">This term</div>
+                    </div>
+                    <div class="stat-icon blue">📋</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <div class="stat-label">Class Average</div>
+                        <div class="stat-value">78.4%</div>
+                        <div class="stat-sub">Rank: #1 in Form 3</div>
+                    </div>
+                    <div class="stat-icon amber">🏆</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="card-title" style="margin-bottom:14px;display:block">Class Teacher Quick Links</span>
+                <div class="nav-cards">
+                    <a href="#" class="nav-card" onclick="switchView('attendance')">
+                        <span class="nc-icon">📋</span>
+                        <span class="nc-label">Take Attendance</span>
+                    </a>
+                    <a href="#" class="nav-card" onclick="switchView('students')">
+                        <span class="nc-icon">🎓</span>
+                        <span class="nc-label">Class Roll Call</span>
+                    </a>
+                    <a href="#" class="nav-card" onclick="switchView('class-performance')">
+                        <span class="nc-icon">📈</span>
+                        <span class="nc-label">Academic Results</span>
+                    </a>
+                    <a href="#" class="nav-card" onclick="switchView('requests')">
+                        <span class="nc-icon">📩</span>
+                        <span class="nc-label">Student Requests</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. ATTENDANCE VIEW -->
+        <div class="portal-view" id="view-attendance">
+            <div class="page-header">
+                <h2>Daily Attendance – Form 3 North 📋</h2>
+                <p>Class teacher daily attendance sheet for <span id="attend-date-txt">Today</span></p>
+            </div>
+            <div class="card" style="margin-bottom:20px">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+                    <div>
+                        <strong style="font-size:15px">Form 3 North Roll Call</strong>
+                        <div style="font-size:12px;color:var(--text-muted)">42 Students Total</div>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn btn-outline btn-sm" onclick="markAllPresent()">Mark All Present</button>
+                        <button class="btn btn-primary btn-sm" onclick="saveAttendance()">💾 Save Attendance</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Adm No</th>
+                                <th>Student Name</th>
+                                <th>Gender</th>
+                                <th>Status Selection</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-rows">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. CLASS PERFORMANCE VIEW -->
+        <div class="portal-view" id="view-class-performance">
+            <div class="page-header">
+                <h2>Form 3 North Overall Performance 📈</h2>
+                <p>Overall subject breakdown for your class stream</p>
+            </div>
+            <div class="card">
+                <div class="chart-placeholder">
+                    <span class="chart-icon">📊</span>
+                    <span>Subject performance chart across Form 3 North</span>
+                    <span style="font-size:11px;opacity:0.6">Maths: 82% | English: 76% | Biology: 79% | Chemistry: 71% | Physics: 75%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. MY STUDENTS VIEW -->
+        <div class="portal-view" id="view-students">
+            <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+                <div>
+                    <h2>My Students – Form 3 North 🎓</h2>
+                    <p>Enrolled students and parent contact information</p>
+                </div>
+                <button class="btn btn-primary" onclick="KHS.openDrawer('request-student-drawer','request-student-overlay')">
+                    ➕ Request Add Student
+                </button>
+            </div>
+            <div class="card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Adm No</th>
+                                <th>Student Name</th>
+                                <th>Gender</th>
+                                <th>Parent / Guardian</th>
+                                <th>Parent Phone</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. STUDENT REQUESTS VIEW -->
+        <div class="portal-view" id="view-requests">
+            <div class="page-header">
+                <h2>Student Addition Requests 📩</h2>
+                <p>Requests submitted to Admin for approval and admission number assignment</p>
+            </div>
+            <div class="card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Parent Name</th>
+                                <th>Date Requested</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requests-table-body">
+                            <tr>
+                                <td><code>SR-00241</code></td>
+                                <td>Kevin Mwangi</td>
+                                <td>Form 3 North</td>
+                                <td>Mary Mwangi</td>
+                                <td>11 Aug 2026</td>
+                                <td><span class="badge pending">⏳ Pending Admin Approval</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>SR-00240</code></td>
+                                <td>Brian Otieno</td>
+                                <td>Form 3 North</td>
+                                <td>Peter Otieno</td>
+                                <td>02 Aug 2026</td>
+                                <td><span class="badge active">✓ Approved (KHS/0342)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. ANNOUNCEMENTS, NOTIFICATIONS, SETTINGS -->
+        <div class="portal-view" id="view-announcements">
+            <div class="page-header"><h2>Announcements 📢</h2><p>School notices & staff bulletins</p></div>
+            <div class="card"><p style="color:var(--text-muted)">• Staff Meeting scheduled for Friday 3:00 PM in Main Hall.</p></div>
+        </div>
+        <div class="portal-view" id="view-notifications">
+            <div class="page-header"><h2>Notifications 🔔</h2><p>Recent alerts and activity</p></div>
+            <div class="card"><p style="color:var(--text-muted)">• 2 new student registration requests pending.</p></div>
+        </div>
+        <div class="portal-view" id="view-settings">
+            <div class="page-header"><h2>Settings ⚙️</h2><p>Account preferences & notifications</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Account preferences and password settings.</p></div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+/* ── Auth Check ────────────────────────────────────── */
+const user = requireAuth();
+if (user && user.role !== 'teacher') window.location.href = user.role + '.html';
+if (!user) throw new Error('Redirecting');
+populateTopBar(user);
+
+const isClassTeacher = user.isClassTeacher === true;
+const classOf        = user.classTeacherOf || '';
+const subjects       = user.subjects || [];
+const classes        = user.classes || [];
+const timetable      = user.timetable || [];
+
+/* Mock Students for Form 3 North */
+const STUDENTS_LIST = [
+    { adm: "KHS/0301", name: "Ali Hassan",  gender: "Male",   parent: "Hassan Ali",  phone: "+254 711 223 344", status: "Present" },
+    { adm: "KHS/0302", name: "John Mwangi", gender: "Male",   parent: "Mary Mwangi", phone: "+254 722 334 455", status: "Present" },
+    { adm: "KHS/0303", name: "Amina Salim", gender: "Female", parent: "Salim Omar",  phone: "+254 733 445 566", status: "Absent"  },
+    { adm: "KHS/0304", name: "Mary Omar",   gender: "Female", parent: "Omar Juma",   phone: "+254 744 556 677", status: "Late"    },
+    { adm: "KHS/0305", name: "Peter Kamau", gender: "Male",   parent: "Jane Kamau",  phone: "+254 755 667 788", status: "Present" },
+];
+
+/* ── View Switcher ──────────────────────────────────── */
+function switchView(viewId, navEl) {
+    // Hide all views
+    document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+    
+    // Show target view
+    const target = document.getElementById('view-' + viewId);
+    if (target) target.classList.add('active');
+
+    // Update active nav item highlight
+    if (navEl) {
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+        navEl.classList.add('active');
+    }
+
+    // Update Topbar Title
+    const titleMap = {
+        dashboard: 'Dashboard',
+        profile: 'My Profile',
+        subjects: 'My Subjects',
+        classes: 'My Classes',
+        results: 'Subject Results',
+        performance: 'Student Performance',
+        myclass: 'My Class – Form 3 North',
+        attendance: 'Daily Attendance',
+        'class-performance': 'Class Performance',
+        students: 'My Students',
+        requests: 'Student Requests',
+        announcements: 'Announcements',
+        notifications: 'Notifications',
+        settings: 'Settings'
+    };
+    document.getElementById('topbar-page-title').textContent = titleMap[viewId] || 'Teacher Portal';
+
+    // Close mobile sidebar if open
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (overlay) overlay.classList.remove('active');
+
+    window.scrollTo(0, 0);
+}
+
+/* ── Populate Dynamic Content ────────────────────────── */
+if (isClassTeacher) {
+    document.getElementById('ct-nav-section').style.display = 'block';
+    document.getElementById('ct-nav-label').textContent = `Class Teacher — ${classOf}`;
+    document.getElementById('attend-badge').style.display = 'inline';
+    document.getElementById('req-badge').style.display = 'inline';
+    document.getElementById('sidebar-subtitle').textContent = 'Class Teacher Portal';
+}
+
+/* Hero Badges */
+const badgeContainer = document.getElementById('hero-badges');
+badgeContainer.innerHTML = `
+    <span class="gc-badge">📚 ${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}</span>
+    <span class="gc-badge">🏫 ${classes.length} Class${classes.length !== 1 ? 'es' : ''}</span>
+    ${isClassTeacher ? `<span class="gc-badge" style="background:rgba(255,255,255,0.32)">🏷️ Class Teacher — ${classOf}</span>` : ''}
+`;
+
+/* Timetable */
+const timetableEl = document.getElementById('timetable-list');
+timetableEl.innerHTML = timetable.map(t => `
+    <div class="timetable-row">
+        <span class="tt-time">${t.time}</span>
+        <span class="tt-subject">${t.subject}</span>
+        <span class="tt-class">${t.class}</span>
+    </div>
+`).join('');
+
+/* Stats */
+const statsContainer = document.getElementById('dash-stats');
+statsContainer.innerHTML = `
+    <div class="stat-card" onclick="switchView('classes')" style="cursor:pointer">
+        <div class="stat-info"><div class="stat-label">My Classes</div><div class="stat-value">${classes.length}</div><div class="stat-sub">Form 1 – 4</div></div>
+        <div class="stat-icon green">🏫</div>
+    </div>
+    <div class="stat-card" onclick="switchView('subjects')" style="cursor:pointer">
+        <div class="stat-info"><div class="stat-label">My Subjects</div><div class="stat-value">${subjects.length}</div><div class="stat-sub">${subjects.join(', ')}</div></div>
+        <div class="stat-icon blue">📚</div>
+    </div>
+    ${isClassTeacher ? `
+    <div class="stat-card" onclick="switchView('myclass')" style="cursor:pointer">
+        <div class="stat-info"><div class="stat-label">Class Students</div><div class="stat-value">42</div><div class="stat-sub">${classOf}</div></div>
+        <div class="stat-icon amber">🎓</div>
+    </div>
+    <div class="stat-card" onclick="switchView('attendance')" style="cursor:pointer">
+        <div class="stat-info"><div class="stat-label">Attendance Today</div><div class="stat-value" style="color:#d97706">Pending</div><div class="stat-sub">Not yet submitted</div></div>
+        <div class="stat-icon" style="background:#fef9e7;color:#d97706">📋</div>
+    </div>` : `
+    <div class="stat-card"><div class="stat-info"><div class="stat-label">Total Students</div><div class="stat-value">148</div><div class="stat-sub">Across all classes</div></div><div class="stat-icon amber">🎓</div></div>
+    <div class="stat-card"><div class="stat-info"><div class="stat-label">Class Avg Score</div><div class="stat-value">68%</div><div class="stat-sub">Last exam</div></div><div class="stat-icon gray">📝</div></div>`}
+`;
+
+/* Quick Nav Cards */
+const quickNavContainer = document.getElementById('quick-nav-cards');
+quickNavContainer.innerHTML = `
+    <a href="#" class="nav-card" onclick="switchView('subjects')"><span class="nc-icon">📚</span><span class="nc-label">My Subjects</span></a>
+    <a href="#" class="nav-card" onclick="switchView('classes')"><span class="nc-icon">🏫</span><span class="nc-label">My Classes</span></a>
+    <a href="#" class="nav-card" onclick="switchView('results')"><span class="nc-icon">📝</span><span class="nc-label">Enter Marks</span></a>
+    ${isClassTeacher ? `
+    <a href="#" class="nav-card" onclick="switchView('attendance')"><span class="nc-icon">📋</span><span class="nc-label">Attendance</span></a>
+    <a href="#" class="nav-card" onclick="switchView('students')"><span class="nc-icon">🎓</span><span class="nc-label">My Students</span></a>
+    <a href="#" class="nav-card" onclick="switchView('requests')"><span class="nc-icon">📩</span><span class="nc-label">Requests</span></a>
+    ` : `
+    <a href="#" class="nav-card" onclick="switchView('performance')"><span class="nc-icon">📊</span><span class="nc-label">Performance</span></a>
+    <a href="#" class="nav-card" onclick="switchView('profile')"><span class="nc-icon">👤</span><span class="nc-label">My Profile</span></a>
+    <a href="#" class="nav-card" onclick="switchView('announcements')"><span class="nc-icon">📢</span><span class="nc-label">Notices</span></a>
+    `}
+`;
+
+/* Class Teacher Tasks */
+if (isClassTeacher) {
+    document.getElementById('dash-tasks-container').innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Class Teacher Action Tasks</span>
+                <span class="card-badge" style="background:#fef9e7;color:#d97706;">${classOf}</span>
+            </div>
+            <div class="task-list">
+                <div class="task-item warn">
+                    <span class="ti-icon">⚠️</span>
+                    <div>
+                        <div class="ti-text">Attendance not submitted for today</div>
+                        <div class="ti-sub">${classOf} • Required daily</div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="switchView('attendance')" style="margin-left:auto;flex-shrink:0">Take Attendance</button>
+                </div>
+                <div class="task-item warn">
+                    <span class="ti-icon">📩</span>
+                    <div>
+                        <div class="ti-text">2 student admission requests pending</div>
+                        <div class="ti-sub">Awaiting Admin approval</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="switchView('requests')" style="margin-left:auto;flex-shrink:0">View Requests</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/* Populate Attendance Table */
+const attRows = document.getElementById('attendance-rows');
+attRows.innerHTML = STUDENTS_LIST.map((st, i) => `
+    <tr>
+        <td><code>${st.adm}</code></td>
+        <td><strong>${st.name}</strong></td>
+        <td>${st.gender}</td>
+        <td>
+            <div class="attend-options" id="att-group-${i}">
+                <button class="attend-btn p-btn ${st.status === 'Present' ? 'active' : ''}" onclick="setAtt(${i}, 'Present', this)">Present</button>
+                <button class="attend-btn a-btn ${st.status === 'Absent' ? 'active' : ''}" onclick="setAtt(${i}, 'Absent', this)">Absent</button>
+                <button class="attend-btn l-btn ${st.status === 'Late' ? 'active' : ''}" onclick="setAtt(${i}, 'Late', this)">Late</button>
+            </div>
+        </td>
+    </tr>
+`).join('');
+
+function setAtt(index, status, btn) {
+    STUDENTS_LIST[index].status = status;
+    const group = document.getElementById(`att-group-${index}`);
+    group.querySelectorAll('.attend-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function markAllPresent() {
+    STUDENTS_LIST.forEach((st, i) => {
+        st.status = 'Present';
+        const group = document.getElementById(`att-group-${i}`);
+        if (group) {
+            group.querySelectorAll('.attend-btn').forEach(b => b.classList.remove('active'));
+            group.querySelector('.p-btn').classList.add('active');
+        }
+    });
+}
+
+function saveAttendance() {
+    alert('✅ Daily attendance for Form 3 North saved successfully!');
+    document.getElementById('attend-badge').style.display = 'none';
+}
+
+/* Populate Students Table */
+const studRows = document.getElementById('students-table-body');
+studRows.innerHTML = STUDENTS_LIST.map(st => `
+    <tr>
+        <td><code>${st.adm}</code></td>
+        <td><strong>${st.name}</strong></td>
+        <td>${st.gender}</td>
+        <td>${st.parent}</td>
+        <td>${st.phone}</td>
+        <td><span class="badge active">Enrolled</span></td>
+    </tr>
+`).join('');
+
+/* Submit Request */
+function submitStudentRequest() {
+    const fname = document.getElementById('req-fname').value.trim();
+    const lname = document.getElementById('req-lname').value.trim();
+    if (!fname || !lname) { alert('Please enter student first and last name.'); return; }
+    
+    alert(`✅ Request to add student "${fname} ${lname}" submitted to Admin for approval!\n\nStatus: Pending Admin Approval`);
+    KHS.closeDrawer('request-student-drawer','request-student-overlay');
+    switchView('requests');
+}
+
+/* Live clock */
+function updateClock() {
+    const now = new Date();
+    document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-KE', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('live-date').textContent = now.toLocaleDateString('en-KE', { weekday:'short', day:'numeric', month:'short' });
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In – Kwale High School SMS</title>
+    <meta name="description" content="Sign in to the Kwale High School Student Management System">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="background-shapes" aria-hidden="true">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+</div>
+
+<div class="login-container">
+    <div class="glass-panel" id="login-panel">
+
+        <!-- Logo -->
+        <div class="logo-area">
+            <div class="logo-icon" aria-hidden="true">KHS</div>
+            <h1>Kwale High School</h1>
+            <p>Student Management System</p>
+        </div>
+
+        <!-- Form -->
+        <form class="login-form" id="login-form" novalidate>
+
+            <div class="input-group">
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <span class="input-icon" aria-hidden="true">👤</span>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon" aria-hidden="true">🔒</span>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                    <button type="button" class="pw-toggle" id="pw-toggle" title="Show/hide password" aria-label="Toggle password visibility">
+                        <span id="pw-eye">👁️</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="options">
+                <label class="remember-me">
+                    <input type="checkbox" id="remember-me" name="remember">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password" id="forgot-link">Forgot password?</a>
+            </div>
+
+            <!-- Error message -->
+            <div class="login-error" id="login-error" role="alert" aria-live="polite" style="display:none">
+                <span>⚠️</span>
+                <span id="error-text">Invalid username or password. Please try again.</span>
+            </div>
+
+            <button type="submit" class="login-button" id="login-btn">
+                <span id="btn-text">Sign In</span>
+                <span id="btn-spinner" class="spinner" style="display:none" aria-hidden="true"></span>
+            </button>
+        </form>
+
+        <!-- Demo credentials (dev only) -->
+        <details class="demo-hint" id="demo-hint">
+            <summary>Demo credentials (dev only)</summary>
+            <div class="demo-grid">
+                <span class="demo-role">👤 admin</span>          <span class="demo-pw">admin123</span>       <span class="demo-label">System Admin</span>
+                <span class="demo-role">🏫 principal</span>      <span class="demo-pw">principal123</span>   <span class="demo-label">Principal</span>
+                <span class="demo-role">📋 deputy</span>         <span class="demo-pw">deputy123</span>      <span class="demo-label">Deputy Principal</span>
+                <span class="demo-role">📚 hod</span>            <span class="demo-pw">hod123</span>         <span class="demo-label">Head of Dept</span>
+                <span class="demo-role">👨‍🏫 teacher</span>       <span class="demo-pw">teacher123</span>     <span class="demo-label">Teacher</span>
+                <span class="demo-role">💰 accountant</span>     <span class="demo-pw">accountant123</span>  <span class="demo-label">Accountant</span>
+                <span class="demo-role">👨‍👦 parent</span>        <span class="demo-pw">parent123</span>      <span class="demo-label">Parent</span>
+            </div>
+        </details>
+
+        <p class="footer-text">Need help? Contact the IT Department</p>
+    </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:8001';
+
+// Role → dashboard mapping
+const ROLE_DASHBOARD = {
+    admin:            'pages/admin.html',
+    principal:        'pages/principal.html',
+    deputy_principal: 'pages/deputy.html',
+    hod:              'pages/hod.html',
+    teacher:          'pages/teacher.html',
+    accountant:       'pages/accountant.html',
+    parent:           'pages/parent.html',
+    student:          'pages/student.html',
+};
+
+// ── Toggle password visibility ──────────────────────────────────
+document.getElementById('pw-toggle').addEventListener('click', () => {
+    const input = document.getElementById('password');
+    const eye   = document.getElementById('pw-eye');
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        eye.textContent = '👁️';
+    }
+});
+
+// ── Show error ──────────────────────────────────────────────────
+function showError(msg) {
+    const el = document.getElementById('login-error');
+    document.getElementById('error-text').textContent = msg;
+    el.style.display = 'flex';
+    document.getElementById('login-panel').classList.add('shake');
+    setTimeout(() => document.getElementById('login-panel').classList.remove('shake'), 600);
+}
+
+function hideError() {
+    document.getElementById('login-error').style.display = 'none';
+}
+
+// ── Loading state ───────────────────────────────────────────────
+function setLoading(on) {
+    const btn     = document.getElementById('login-btn');
+    const text    = document.getElementById('btn-text');
+    const spinner = document.getElementById('btn-spinner');
+    btn.disabled     = on;
+    text.style.display    = on ? 'none' : 'inline';
+    spinner.style.display = on ? 'inline-block' : 'none';
+}
+
+// ── Quick fill from demo grid ───────────────────────────────────
+document.querySelectorAll('.demo-role').forEach((el) => {
+    el.style.cursor = 'pointer';
+    el.title = 'Click to auto-fill';
+    el.addEventListener('click', () => {
+        // username is text after the emoji — strip leading non-letter chars
+        const username = el.textContent.trim().replace(/^\S+\s+/, '').trim();
+        const pw       = el.nextElementSibling ? el.nextElementSibling.textContent.trim() : '';
+        document.getElementById('username').value = username;
+        document.getElementById('password').value = pw;
+        document.getElementById('password').type  = 'text';
+        document.getElementById('pw-eye').textContent = '🙈';
+        hideError();
+        document.getElementById('username').focus();
+    });
+});
+
+// ── Login form submit ───────────────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+        showError('Please enter your username and password.');
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/auth/login`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ username, password }),
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            showError(err.detail || 'Invalid username or password.');
+            return;
+        }
+
+        const data = await resp.json();
+        const user = data.user;
+
+        // Persist user session and JWT token to localStorage
+        localStorage.setItem('khs_user_v2', JSON.stringify(user));
+        if (data.token) localStorage.setItem('khs_jwt', data.token);
+
+        const dest = ROLE_DASHBOARD[user.role];
+        if (dest) {
+            window.location.href = dest;
+        } else {
+            showError(`No dashboard configured for role: ${user.role}`);
+        }
+
+    } catch (err) {
+        showError('Cannot connect to server. Please ensure the server is running.');
+        console.error('Login error:', err);
+    } finally {
+        setLoading(false);
+    }
+});
+
+// ── Forgot password placeholder ─────────────────────────────────
+document.getElementById('forgot-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('Please contact the IT Department to reset your password.\n\nPhone: 0700 000 000');
+});
+
+// ── Keyboard shortcut: click demo row to fill ───────────────────
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideError();
+});
+</script>
+</body>
+</html>

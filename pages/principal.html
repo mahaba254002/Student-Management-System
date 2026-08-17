@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Portal – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text">
+            <span>Kwale High</span>
+            <span>Principal's Office</span>
+        </div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></a>
+
+        <span class="nav-section-title">Academic</span>
+        <a href="#" class="nav-item" onclick="switchView('classes', this)"><span class="nav-icon">🏫</span><span class="nav-label">Classes</span></a>
+        <a href="#" class="nav-item" onclick="switchView('subjects', this)"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+        <a href="#" class="nav-item" onclick="switchView('exams', this)"><span class="nav-icon">📝</span><span class="nav-label">Exams</span></a>
+
+        <span class="nav-section-title">People</span>
+        <a href="#" class="nav-item" onclick="switchView('teachers', this)"><span class="nav-icon">👨‍🏫</span><span class="nav-label">Teachers</span></a>
+        <a href="#" class="nav-item" onclick="switchView('staff', this)"><span class="nav-icon">👷</span><span class="nav-label">Staff</span></a>
+        <a href="#" class="nav-item" onclick="switchView('students', this)"><span class="nav-icon">🎓</span><span class="nav-label">Students</span></a>
+
+        <span class="nav-section-title">Reports</span>
+        <a href="#" class="nav-item" onclick="switchView('academic-reports', this)"><span class="nav-icon">📊</span><span class="nav-label">Academic Reports</span></a>
+        <a href="#" class="nav-item" onclick="switchView('attendance-reports', this)"><span class="nav-icon">📋</span><span class="nav-label">Attendance Reports</span></a>
+
+        <span class="nav-section-title">System</span>
+        <a href="#" class="nav-item" onclick="switchView('settings', this)"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><span class="btn-icon">🚪</span><span class="btn-label">Logout</span></button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">Dashboard</span>
+        <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search…"></div>
+        <div class="topbar-actions">
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+            <div class="user-pill" onclick="switchView('settings')">
+                <div class="user-avatar-sm" id="user-avatar">FM</div>
+                <div class="user-info-sm"><span class="u-name" id="user-name">Principal</span><span class="u-role" id="user-role">Principal</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <div class="page-header">
+                <h2>Welcome back, <span id="greeting-name">Dr. Fatuma Mwangi</span> 👋</h2>
+                <p>School overview – Academic, People & Performance. (Finance restricted to Accountant)</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchView('students')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Enrolled Students</div><div class="stat-value">1,245</div><div class="stat-sub">↑ 12 this term</div></div><div class="stat-icon green">🎓</div></div>
+                <div class="stat-card" onclick="switchView('teachers')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Active Teachers</div><div class="stat-value">86</div><div class="stat-sub">3 on leave</div></div><div class="stat-icon blue">👨‍🏫</div></div>
+                <div class="stat-card" onclick="switchView('classes')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Departments</div><div class="stat-value">8</div><div class="stat-sub">HODs in place</div></div><div class="stat-icon gray">🏫</div></div>
+                <div class="stat-card" onclick="switchView('academic-reports')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Avg. Performance</div><div class="stat-value">74%</div><div class="stat-sub">↑ 3% from last term</div></div><div class="stat-icon amber">📊</div></div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Quick Access</span><span class="card-badge">Principal</span></div>
+                    <div class="nav-cards">
+                        <a href="#" class="nav-card" onclick="switchView('classes')"><span class="nc-icon">🏫</span><span class="nc-label">Classes</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('subjects')"><span class="nc-icon">📚</span><span class="nc-label">Subjects</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('exams')"><span class="nc-icon">📝</span><span class="nc-label">Exams</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('teachers')"><span class="nc-icon">👨‍🏫</span><span class="nc-label">Teachers</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('students')"><span class="nc-icon">🎓</span><span class="nc-label">Students</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('academic-reports')"><span class="nc-icon">📊</span><span class="nc-label">Reports</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Academic Performance</span><span class="card-badge">This Term</span></div>
+                    <div class="chart-placeholder"><span class="chart-icon">📈</span><span>School-wide Mean Score: 7.4 (B-)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CLASSES VIEW -->
+        <div class="portal-view" id="view-classes">
+            <div class="page-header"><h2>Classes Overview 🏫</h2><p>Form 1 through Form 4 stream statistics</p></div>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Form Stream</th><th>Class Teacher</th><th>Students</th><th>Performance</th></tr></thead>
+                    <tbody>
+                        <tr><td>Form 1 North</td><td>Mr. David Njoroge</td><td>42</td><td>78%</td></tr>
+                        <tr><td>Form 2 South</td><td>Ms. Mary Wanjiku</td><td>45</td><td>72%</td></tr>
+                        <tr><td>Form 3 North</td><td>Mr. Ali Hassan</td><td>39</td><td>81%</td></tr>
+                        <tr><td>Form 4 South</td><td>Ms. Grace Otieno</td><td>41</td><td>76%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. SUBJECTS VIEW -->
+        <div class="portal-view" id="view-subjects">
+            <div class="page-header"><h2>Academic Subjects 📚</h2><p>Curriculum and department subject allocation</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Subject list & department performance metrics.</p></div>
+        </div>
+
+        <!-- 4. EXAMS VIEW -->
+        <div class="portal-view" id="view-exams">
+            <div class="page-header"><h2>Examinations Schedule 📝</h2><p>Mid-Term and End-Term exam calendars</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Exam timetables and grading status.</p></div>
+        </div>
+
+        <!-- 5. TEACHERS VIEW -->
+        <div class="portal-view" id="view-teachers">
+            <div class="page-header"><h2>Teaching Staff 👨‍🏫</h2><p>Directory of teachers and assigned departments</p></div>
+            <div class="card"><p style="color:var(--text-muted)">86 Teaching Staff members on record.</p></div>
+        </div>
+
+        <!-- 6. STAFF VIEW -->
+        <div class="portal-view" id="view-staff">
+            <div class="page-header"><h2>Non-Teaching Staff 👷</h2><p>Support staff & administration team</p></div>
+            <div class="card"><p style="color:var(--text-muted)">34 Support Staff members on record.</p></div>
+        </div>
+
+        <!-- 7. STUDENTS VIEW -->
+        <div class="portal-view" id="view-students">
+            <div class="page-header"><h2>Student Register 🎓</h2><p>Total 1,245 enrolled students</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Search student profiles and enrollment records.</p></div>
+        </div>
+
+        <!-- 8. ACADEMIC REPORTS VIEW -->
+        <div class="portal-view" id="view-academic-reports">
+            <div class="page-header"><h2>Academic Reports 📊</h2><p>Analytics, grade distributions, and trends</p></div>
+            <div class="card"><p style="color:var(--text-muted)">School Mean Grade Summary & KNEC Projections.</p></div>
+        </div>
+
+        <!-- 9. ATTENDANCE REPORTS VIEW -->
+        <div class="portal-view" id="view-attendance-reports">
+            <div class="page-header"><h2>Attendance Analytics 📋</h2><p>Daily student and teacher attendance rates</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Average attendance rate: 94.2% this term.</p></div>
+        </div>
+
+        <!-- 10. SETTINGS VIEW -->
+        <div class="portal-view" id="view-settings">
+            <div class="page-header"><h2>Settings ⚙️</h2><p>Principal account settings</p></div>
+            <div class="card"><p style="color:var(--text-muted)">Preferences & profile settings.</p></div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+    const user = requireAuth();
+    if (user && user.role !== 'principal') window.location.href = user.role + '.html';
+    if (user) { populateTopBar(user); document.getElementById('greeting-name').textContent = user.name; }
+
+    function switchView(viewId, navEl) {
+        document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        if (navEl) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+        }
+        document.getElementById('topbar-page-title').textContent = viewId.replace('-', ' ').toUpperCase();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text"><span>Kwale High</span><span>Parent Portal</span></div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></a>
+
+        <span class="nav-section-title">My Child</span>
+        <a href="#" class="nav-item" onclick="switchView('child', this)"><span class="nav-icon">👦</span><span class="nav-label">Child Profile</span></a>
+        <a href="#" class="nav-item" onclick="switchView('attendance', this)"><span class="nav-icon">📋</span><span class="nav-label">Attendance</span></a>
+        <a href="#" class="nav-item" onclick="switchView('results', this)"><span class="nav-icon">📝</span><span class="nav-label">Exam Results</span></a>
+        <a href="#" class="nav-item" onclick="switchView('report-card', this)"><span class="nav-icon">📚</span><span class="nav-label">Report Card</span></a>
+
+        <span class="nav-section-title">Fees</span>
+        <a href="#" class="nav-item" onclick="switchView('fee-statement', this)"><span class="nav-icon">💳</span><span class="nav-label">Fee Statement</span></a>
+        <a href="#" class="nav-item" onclick="switchView('receipts', this)"><span class="nav-icon">🧾</span><span class="nav-label">Receipts</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><span class="btn-icon">🚪</span><span class="btn-label">Logout</span></button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">Parent Portal</span>
+        <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search…"></div>
+        <div class="topbar-actions">
+            <button class="icon-btn">🔔</button>
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">PM</div>
+                <div class="user-info-sm"><span class="u-name" id="user-name">Mr. Peter Mwenda</span><span class="u-role" id="user-role">Parent</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <div class="page-header">
+                <h2>My Child's Overview 👨‍👩‍👦</h2>
+                <p>Track your child's academic progress, attendance and fees at Kwale High School.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchView('child')" style="cursor:pointer">
+                    <div class="stat-info">
+                        <div class="stat-label">Child Name</div>
+                        <div class="stat-value" style="font-size:18px">John Mwenda</div>
+                        <div class="stat-sub">Form 3 North</div>
+                    </div>
+                    <div class="stat-icon green">👦</div>
+                </div>
+                <div class="stat-card" onclick="switchView('attendance')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Attendance</div><div class="stat-value">92%</div><div class="stat-sub">This term</div></div><div class="stat-icon blue">📋</div></div>
+                <div class="stat-card" onclick="switchView('results')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Last Exam Score</div><div class="stat-value">68%</div><div class="stat-sub">Mid-term</div></div><div class="stat-icon gray">📝</div></div>
+                <div class="stat-card" onclick="switchView('fee-statement')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Fee Balance</div><div class="stat-value">KSh 8,500</div><div class="stat-sub">Outstanding</div></div><div class="stat-icon amber">💳</div></div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Quick Access</span><span class="card-badge">Parent</span></div>
+                    <div class="nav-cards">
+                        <a href="#" class="nav-card" onclick="switchView('child')"><span class="nc-icon">👦</span><span class="nc-label">Profile</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('attendance')"><span class="nc-icon">📋</span><span class="nc-label">Attendance</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('results')"><span class="nc-icon">📝</span><span class="nc-label">Results</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('report-card')"><span class="nc-icon">📚</span><span class="nc-label">Report Card</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('fee-statement')"><span class="nc-icon">💳</span><span class="nc-label">Fee Statement</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('receipts')"><span class="nc-icon">🧾</span><span class="nc-label">Receipts</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Academic Progress</span><span class="card-badge">This Term</span></div>
+                    <div class="chart-placeholder"><span class="chart-icon">📈</span><span>John Mwenda's score trends</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CHILD PROFILE -->
+        <div class="portal-view" id="view-child"><div class="page-header"><h2>John Mwenda's Profile 👦</h2></div><div class="card"><p style="color:var(--text-muted)">Adm No: KHS/0312/2024 • Class: Form 3 North • Class Teacher: Mr. David Njoroge.</p></div></div>
+        <!-- 3. ATTENDANCE -->
+        <div class="portal-view" id="view-attendance"><div class="page-header"><h2>Child Attendance Record 📋</h2></div><div class="card"><p style="color:var(--text-muted)">92% attendance rate this term (45 Days Present, 2 Days Absent, 1 Day Late).</p></div></div>
+        <!-- 4. EXAM RESULTS -->
+        <div class="portal-view" id="view-results"><div class="page-header"><h2>Exam Results 📝</h2></div><div class="card"><p style="color:var(--text-muted)">Mathematics: 82% (A-) | Physics: 68% (B) | English: 74% (B+).</p></div></div>
+        <!-- 5. REPORT CARD -->
+        <div class="portal-view" id="view-report-card"><div class="page-header"><h2>Official Term Report Card 📚</h2></div><div class="card"><p style="color:var(--text-muted)">Term 2 Report Card available for PDF download.</p></div></div>
+        <!-- 6. FEE STATEMENT -->
+        <div class="portal-view" id="view-fee-statement"><div class="page-header"><h2>Fee Statement 💳</h2></div><div class="card"><p style="color:var(--text-muted)">Total Billed: KSh 35,000 | Paid: KSh 26,500 | Outstanding Balance: KSh 8,500.</p></div></div>
+        <!-- 7. RECEIPTS -->
+        <div class="portal-view" id="view-receipts"><div class="page-header"><h2>Fee Payment Receipts 🧾</h2></div><div class="card"><p style="color:var(--text-muted)">Receipt #REC-8921 (KSh 26,500 paid via M-Pesa on 14 May 2026).</p></div></div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+    const user = requireAuth();
+    if (user && user.role !== 'parent') window.location.href = user.role + '.html';
+    if (user) { populateTopBar(user); }
+
+    function switchView(viewId, navEl) {
+        document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        if (navEl) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+        }
+        document.getElementById('topbar-page-title').textContent = viewId.replace('-', ' ').toUpperCase();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+</script>
+</body>
+</html>

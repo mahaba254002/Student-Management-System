@@ -1,0 +1,359 @@
+/* ============================================================
+   styles.css — Kwale High School SMS
+   Login page styles  •  Mobile-first  •  Glassmorphism
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── Tokens ──────────────────────────────────────────────── */
+:root {
+    --green:       #35a57c;
+    --green-dark:  #035c3c;
+    --green-mid:   #058f5e;
+    --gray:        #868c98;
+    --dark:        #1a1a2e;
+    --white:       #ffffff;
+    --glass-bg:    rgba(255,255,255,0.18);
+    --glass-border:rgba(255,255,255,0.32);
+    --glass-shadow:0 12px 48px rgba(3,92,60,0.22);
+    --input-bg:    rgba(255,255,255,0.65);
+    --radius:      14px;
+    --radius-sm:   10px;
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+/* ── Body / Background ───────────────────────────────────── */
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #c8ded6 0%, #b8cfe6 60%, #d4e0f0 100%);
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden;
+    position: relative;
+    color: var(--dark);
+}
+
+/* ── Animated Background Blobs ───────────────────────────── */
+.background-shapes {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.75;
+    animation: float 22s infinite alternate ease-in-out;
+}
+
+.shape-1 {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, var(--green) 0%, var(--green-dark) 100%);
+    top: -120px; left: -120px;
+}
+
+.shape-2 {
+    width: 560px; height: 560px;
+    background: radial-gradient(circle, #4a90b8 0%, #2a5c8a 100%);
+    bottom: -160px; right: -120px;
+    animation-delay: -6s;
+}
+
+.shape-3 {
+    width: 320px; height: 320px;
+    background: rgba(255,255,255,0.9);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    animation-delay: -12s;
+}
+
+@keyframes float {
+    0%   { transform: translate(0,0) scale(1); }
+    33%  { transform: translate(30px,-40px) scale(1.08); }
+    66%  { transform: translate(-20px,25px) scale(0.93); }
+    100% { transform: translate(0,0) scale(1); }
+}
+
+/* ── Login Container ─────────────────────────────────────── */
+.login-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 460px;
+    padding: 20px;
+}
+
+/* ── Glass Panel ─────────────────────────────────────────── */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 26px;
+    padding: 44px 40px 36px;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 56px rgba(3,92,60,0.3);
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.logo-area {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--green), var(--green-mid));
+    color: var(--white);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(3,92,60,0.35);
+    border: 3px solid rgba(255,255,255,0.6);
+    animation: pulse-logo 3s ease-in-out infinite;
+}
+
+@keyframes pulse-logo {
+    0%, 100% { box-shadow: 0 8px 24px rgba(3,92,60,0.35); }
+    50%       { box-shadow: 0 8px 36px rgba(3,92,60,0.55); }
+}
+
+.logo-area h1 {
+    font-size: 24px; font-weight: 700;
+    color: var(--dark); margin-bottom: 4px;
+    letter-spacing: -0.02em;
+}
+
+.logo-area p {
+    font-size: 13px; color: #4a5568; font-weight: 500;
+}
+
+/* ── Form ────────────────────────────────────────────────── */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.input-group label {
+    font-size: 13px; font-weight: 600;
+    color: var(--dark); padding-left: 2px;
+}
+
+/* Wrapper for icon + input + toggle */
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 15px;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 13px 44px 13px 42px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    background: var(--input-bg);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px; font-weight: 500;
+    color: var(--dark);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.input-group input::placeholder { color: #a0aec0; font-weight: 400; }
+
+.input-group input:focus {
+    background: rgba(255,255,255,0.9);
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(53,165,124,0.12);
+}
+
+/* Password toggle button */
+.pw-toggle {
+    position: absolute;
+    right: 12px;
+    background: none; border: none;
+    font-size: 16px; cursor: pointer;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+.pw-toggle:hover { opacity: 1; }
+
+/* ── Options row ─────────────────────────────────────────── */
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-top: -4px;
+}
+
+.remember-me {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; font-weight: 500; user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+    accent-color: var(--green);
+    width: 15px; height: 15px; cursor: pointer;
+}
+
+.forgot-password {
+    color: var(--green-dark); text-decoration: none;
+    font-weight: 600; transition: color 0.2s;
+}
+.forgot-password:hover { color: var(--green); text-decoration: underline; }
+
+/* ── Error box ───────────────────────────────────────────── */
+.login-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(229,62,62,0.12);
+    border: 1px solid rgba(229,62,62,0.28);
+    color: #c53030;
+    font-size: 13px; font-weight: 500;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Submit button ───────────────────────────────────────── */
+.login-button {
+    margin-top: 6px;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: linear-gradient(135deg, var(--green), var(--green-mid));
+    color: var(--white);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 4px 16px rgba(3,92,60,0.3);
+    letter-spacing: 0.02em;
+}
+
+.login-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(3,92,60,0.42);
+}
+
+.login-button:active:not(:disabled) { transform: translateY(1px); }
+.login-button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Loading spinner */
+.spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Shake animation ─────────────────────────────────────── */
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(8px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(5px); }
+}
+.shake { animation: shake 0.5s ease; }
+
+/* ── Demo hint ───────────────────────────────────────────── */
+.demo-hint {
+    margin-top: 22px;
+    font-size: 12px;
+    color: rgba(74,85,104,0.9);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.2);
+    padding: 10px 14px;
+}
+
+.demo-hint summary {
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    user-select: none;
+    color: #4a5568;
+    list-style: none;
+    padding: 2px 0;
+}
+.demo-hint summary::-webkit-details-marker { display: none; }
+.demo-hint[open] summary::after { content: ' ▲'; font-size: 10px; }
+.demo-hint:not([open]) summary::after { content: ' ▼'; font-size: 10px; }
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 5px 10px;
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: #2d3748;
+}
+
+.demo-role { font-weight: 600; cursor: pointer; }
+.demo-role:hover { color: var(--green-dark); }
+.demo-pw   { font-family: monospace; color: #555; }
+.demo-label{ color: #888; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer-text {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .login-container { padding: 16px; }
+    .glass-panel { padding: 32px 22px 28px; border-radius: 20px; }
+    .logo-icon  { width: 60px; height: 60px; font-size: 18px; }
+    .logo-area h1 { font-size: 20px; }
+    .options { flex-direction: column; gap: 10px; align-items: flex-start; }
+}

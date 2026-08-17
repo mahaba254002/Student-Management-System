@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fees Collection – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Fees Collection</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Fees Collection</h2>
+                <p>View all fee payments and balances</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Record Payment</button>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Collected</div>
+                    <div class="stat-value" style="color:var(--green-dark);">KES 2.41M</div>
+                </div>
+                <div class="stat-icon green">📈</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Outstanding Balances</div>
+                    <div class="stat-value" style="color:var(--danger);">KES 1.61M</div>
+                </div>
+                <div class="stat-icon red">📉</div>
+            </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:600px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Adm No.</th>
+                            <th>Amount (KES)</th>
+                            <th>Method</th>
+                            <th>Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fees-body">
+                        <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'accountant', 'parent']);
+if (user) populateTopBar(user);
+
+async function loadFees() {
+    const tbody = document.getElementById('fees-body');
+    const fees = await apiFetch('/api/finance/fees?limit=100');
+    
+    if (!fees) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--danger);">Failed to load fees</td></tr>';
+        return;
+    }
+    
+    if (!fees.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No payments found</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = fees.map(f => `
+        <tr>
+            <td style="font-size:12px;">${f.payment_date}</td>
+            <td style="font-weight:600;color:var(--dark);">${f.first_name} ${f.last_name}</td>
+            <td style="font-family:monospace;font-size:12px;color:var(--text-muted);">${f.admission_number || '—'}</td>
+            <td style="color:var(--green-dark);font-weight:700;">${Number(f.amount).toLocaleString()}</td>
+            <td><span class="tag">${f.payment_method}</span></td>
+            <td style="font-family:monospace;font-size:12px;">${f.reference_no || '—'}</td>
+        </tr>
+    `).join('');
+}
+
+loadFees();
+</script>
+</body>
+</html>

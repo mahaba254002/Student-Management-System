@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile – Kwale High School</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .profile-banner {
+            background: linear-gradient(135deg, var(--green-dark), #057a51);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            color: #fff;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .profile-av {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .profile-info h2 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+        .profile-info p  { margin: 0; font-size: 13px; opacity: 0.85; }
+        .profile-badges  { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .badge-white {
+            background: rgba(255,255,255,0.2); color: #fff;
+            padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .subject-chip {
+            display: inline-block;
+            background: var(--green-light); color: var(--green-dark);
+            padding: 4px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; margin: 3px;
+        }
+        .class-chip {
+            display: inline-block;
+            background: #e8f0fe; color: #1d4ed8;
+            padding: 4px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; margin: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">&#9776;</button>
+        <span class="topbar-title">My Profile</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">T</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Teacher</span>
+                    <span class="u-role" id="user-role">Teacher</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div id="profile-root">
+            <div class="empty-state"><div class="es-icon">&#128100;</div><div class="es-text">Loading profile…</div></div>
+        </div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['teacher', 'hod', 'principal', 'deputy_principal', 'admin', 'accountant']);
+if (user) populateTopBar(user);
+
+const staffId = user ? (user.staffId || user.staff_id) : null;
+
+async function loadProfile() {
+    const root = document.getElementById('profile-root');
+    if (!staffId) {
+        root.innerHTML = `<div class="empty-state"><div class="es-icon">&#10060;</div><div class="es-text">No staff ID in session. Please log out and log back in.</div></div>`;
+        return;
+    }
+
+    const [profile, classes] = await Promise.all([
+        apiFetch(`/api/staff/${staffId}`),
+        apiFetch(`/api/teacher/${staffId}/classes`)
+    ]);
+
+    if (!profile) {
+        root.innerHTML = `<div class="empty-state"><div class="es-icon">&#10060;</div><div class="es-text">Could not load profile. Please try again.</div></div>`;
+        return;
+    }
+
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    const initials = ((profile.first_name || '')[0] + (profile.last_name || '')[0]).toUpperCase();
+    const subjects = (profile.subjects || []).filter(Boolean);
+    const myClasses = classes || [];
+    const isClassTeacher = myClasses.some(c => c.assignment_role === 'CLASS_TEACHER');
+    const classTeacherOf = myClasses.find(c => c.assignment_role === 'CLASS_TEACHER');
+
+    let statusCls = 'active';
+    if (profile.status === 'ON_LEAVE') statusCls = 'leave';
+    if (['TERMINATED','SUSPENDED','RESIGNED'].includes(profile.status)) statusCls = 'inactive';
+
+    root.innerHTML = `
+        <div class="profile-banner">
+            <div class="profile-av">${initials}</div>
+            <div class="profile-info">
+                <h2>${fullName}</h2>
+                <p>${(profile.role||'').replace(/_/g,' ')} &bull; ${profile.department || 'N/A'} &bull; Staff No: ${profile.staff_number || 'N/A'}</p>
+                <div class="profile-badges">
+                    <span class="badge-white">${profile.status || 'ACTIVE'}</span>
+                    ${isClassTeacher ? `<span class="badge-white">Class Teacher: ${classTeacherOf.name}</span>` : ''}
+                    ${profile.tsc_number ? `<span class="badge-white">TSC: ${profile.tsc_number}</span>` : ''}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><span class="card-title">Employment Details</span></div>
+                <div class="info-row"><span class="ir-label">Staff Number</span><span class="ir-value" style="font-family:monospace;font-weight:700;">${profile.staff_number || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Role</span><span class="ir-value">${(profile.role||'').replace(/_/g,' ')}</span></div>
+                <div class="info-row"><span class="ir-label">Department</span><span class="ir-value">${profile.department || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Employment Type</span><span class="ir-value">${profile.employment_type === 'TEACHING' ? 'Teaching Staff' : 'Non-Teaching'}</span></div>
+                <div class="info-row"><span class="ir-label">Date Joined</span><span class="ir-value">${profile.employment_date || profile.hire_date || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Contract</span><span class="ir-value">${profile.contract_type || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Qualification</span><span class="ir-value">${profile.qualification || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Status</span><span class="ir-value"><span class="badge ${statusCls}">${(profile.status||'').replace(/_/g,' ')}</span></span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Personal Details</span></div>
+                <div class="info-row"><span class="ir-label">Phone</span><span class="ir-value"><a href="tel:${profile.phone||''}" style="color:var(--green-dark);">${profile.phone || '—'}</a></span></div>
+                <div class="info-row"><span class="ir-label">Email</span><span class="ir-value"><a href="mailto:${profile.email||''}" style="color:var(--green-dark);">${profile.email || '—'}</a></span></div>
+                <div class="info-row"><span class="ir-label">National ID</span><span class="ir-value">${profile.national_id || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">Gender</span><span class="ir-value">${profile.gender || '—'}</span></div>
+                <div class="info-row"><span class="ir-label">County</span><span class="ir-value">${profile.county || '—'}</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Assigned Subjects</span></div>
+                <div style="padding:4px 0;">
+                    ${subjects.length
+                        ? subjects.map(s => `<span class="subject-chip">${s}</span>`).join('')
+                        : '<span style="color:var(--text-muted);font-size:13px;">No subjects assigned</span>'}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Assigned Classes</span></div>
+                <div style="padding:4px 0;">
+                    ${myClasses.length
+                        ? myClasses.map(c => `<span class="class-chip">${c.name} <small style="opacity:.7;">(${c.assignment_role === 'CLASS_TEACHER' ? 'Class Teacher' : 'Subject'})</small></span>`).join('')
+                        : '<span style="color:var(--text-muted);font-size:13px;">No classes assigned</span>'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+loadProfile();
+</script>
+</body>
+</html>

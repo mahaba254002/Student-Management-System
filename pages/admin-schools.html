@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Previous Schools | Kwale High School</title>
+
+    <link rel="stylesheet" href="../dashboard.css">
+
+
+    <style>
+        /* =========================================
+           PAGE HEADER
+        ========================================= */
+
+        .page-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header-row h2 {
+            margin: 0 0 6px;
+            font-size: 24px;
+            color: var(--dark);
+        }
+
+        .page-header-row p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+
+        /* =========================================
+           BUTTONS
+        ========================================= */
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            min-height: 42px;
+            padding: 10px 16px;
+
+            border: none;
+            border-radius: var(--radius-sm);
+
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+            border: 1px solid var(--gray-border);
+        }
+
+
+        /* =========================================
+           SUMMARY
+        ========================================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            padding: 18px;
+
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+        }
+
+        .summary-label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+
+        /* =========================================
+           SEARCH
+        ========================================= */
+
+        .search-card {
+            display: flex;
+            gap: 12px;
+
+            padding: 16px;
+
+            margin-bottom: 20px;
+
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+        }
+
+        .search-input {
+            flex: 1;
+
+            min-height: 42px;
+            padding: 10px 14px;
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            font-family: inherit;
+            font-size: 16px;
+
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--green);
+        }
+
+
+        /* =========================================
+           TABLE
+        ========================================= */
+
+        .schools-card {
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .schools-table {
+            width: 100%;
+            min-width: 750px;
+
+            border-collapse: collapse;
+        }
+
+        .schools-table th {
+            padding: 14px 18px;
+
+            background: var(--gray-light);
+
+            text-align: left;
+
+            color: var(--text-muted);
+
+            font-size: 11px;
+            text-transform: uppercase;
+
+            white-space: nowrap;
+        }
+
+        .schools-table td {
+            padding: 16px 18px;
+
+            border-top: 1px solid var(--gray-border);
+
+            font-size: 13px;
+            color: var(--dark);
+        }
+
+        .school-name {
+            font-weight: 700;
+        }
+
+
+        /* =========================================
+           BADGES
+        ========================================= */
+
+        .school-type {
+            display: inline-flex;
+
+            padding: 5px 10px;
+
+            border-radius: 20px;
+
+            background: var(--green-light);
+
+            color: var(--green);
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+
+        /* =========================================
+           ACTIONS
+        ========================================= */
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            min-height: 34px;
+
+            padding: 6px 10px;
+
+            background: var(--white);
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+
+        /* =========================================
+           EMPTY STATE
+        ========================================= */
+
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: var(--dark);
+        }
+
+
+        /* =========================================
+           MODAL
+        ========================================= */
+
+        .modal-overlay {
+            display: none;
+
+            position: fixed;
+            inset: 0;
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 550px;
+
+            max-height: 90vh;
+            overflow-y: auto;
+
+            background: var(--white);
+
+            border-radius: var(--radius);
+
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 20px;
+
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: var(--gray-light);
+
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+
+        /* =========================================
+           FORM
+        ========================================= */
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            min-height: 44px;
+
+            padding: 10px 12px;
+
+            box-sizing: border-box;
+
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-sm);
+
+            background: var(--white);
+
+            font-family: inherit;
+            font-size: 16px;
+
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--green);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+
+            margin-top: 20px;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 768px) {
+
+            .page-header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-header-row h2 {
+                font-size: 20px;
+            }
+
+            .page-header-row .btn {
+                width: 100%;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .search-card {
+                padding: 12px;
+            }
+
+            .modal-overlay {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .modal {
+                max-width: none;
+                max-height: 90vh;
+
+                border-radius:
+                    var(--radius) var(--radius) 0 0;
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 16px;
+            }
+
+            .modal-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions .btn {
+                width: 100%;
+            }
+
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+
+    <div class="sidebar-overlay" id="sidebar-overlay">
+    </div>
+
+
+
+    <!-- =========================================
+     SIDEBAR
+========================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+
+        <div class="sidebar-logo">
+
+            <div class="logo-badge">
+                KHS
+            </div>
+
+
+            <div class="logo-text">
+
+                <span>Kwale High</span>
+                <span>Admin Portal</span>
+
+            </div>
+
+
+            <button class="sidebar-close" id="sidebar-close">
+
+                ✕
+
+            </button>
+
+        </div>
+
+
+
+        <nav class="sidebar-nav">
+
+
+            <span class="nav-section-title">
+                Main
+            </span>
+
+            <a href="admin.html" class="nav-item">
+
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Dashboard</span>
+
+            </a>
+
+
+
+            <span class="nav-section-title">
+                Students
+            </span>
+
+            <a href="admin-students.html" class="nav-item">
+
+                <span class="nav-icon">🎓</span>
+                <span class="nav-label">All Students</span>
+
+            </a>
+
+            <a href="admin-add-student.html" class="nav-item">
+
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">Add New Student</span>
+
+            </a>
+
+
+
+            <span class="nav-section-title">
+                Academic
+            </span>
+
+            <a href="admin-classes.html" class="nav-item">
+
+                <span class="nav-icon">🏫</span>
+                <span class="nav-label">Classes</span>
+
+            </a>
+
+            <a href="admin-subjects.html" class="nav-item">
+
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Subjects</span>
+
+            </a>
+
+            <a href="admin-exams.html" class="nav-item">
+
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">Exams</span>
+
+            </a>
+
+
+
+            <span class="nav-section-title">
+                School
+            </span>
+
+            <a href="admin-academic-years.html" class="nav-item">
+
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Academic Years</span>
+
+            </a>
+
+            <a href="admin-dormitories.html" class="nav-item">
+
+                <span class="nav-icon">🛏️</span>
+                <span class="nav-label">Dormitories</span>
+
+            </a>
+
+            <a href="admin-schools.html" class="nav-item active">
+
+                <span class="nav-icon">🏛️</span>
+                <span class="nav-label">Previous Schools</span>
+
+            </a>
+
+
+
+            <span class="nav-section-title">
+                System
+            </span>
+
+            <a href="admin-users.html" class="nav-item">
+
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Users</span>
+
+            </a>
+
+
+        </nav>
+
+
+
+        <div class="sidebar-footer">
+
+            <button class="logout-btn" onclick="logout()">
+
+                <span class="btn-icon">🚪</span>
+                <span class="btn-label">Logout</span>
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =========================================
+     MAIN CONTENT
+========================================= -->
+
+    <div class="main-wrapper" id="main-wrapper">
+
+
+        <header class="topbar">
+
+
+            <button class="topbar-toggle" id="sidebar-toggle">
+
+                ☰
+
+            </button>
+
+
+            <span class="topbar-title">
+                Previous Schools
+            </span>
+
+
+            <div class="topbar-actions">
+
+                <div class="user-pill">
+
+                    <div class="user-avatar-sm" id="user-avatar">
+
+                        AD
+
+                    </div>
+
+                    <div class="user-info-sm">
+
+                        <span class="u-name" id="user-name">
+
+                            Admin
+
+                        </span>
+
+                        <span class="u-role" id="user-role">
+
+                            Administrator
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </header>
+
+
+
+        <main class="page-content">
+
+
+            <!-- HEADER -->
+
+            <div class="page-header-row">
+
+                <div>
+
+                    <h2>
+                        Previous Schools 🏛️
+                    </h2>
+
+                    <p>
+                        Manage schools where students studied before joining Kwale High School.
+                    </p>
+
+                </div>
+
+
+                <button class="btn btn-primary" id="add-school-btn">
+
+                    ➕ Add School
+
+                </button>
+
+            </div>
+
+
+
+            <!-- SUMMARY -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Total Schools
+                    </span>
+
+                    <strong class="summary-value" id="total-schools">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Primary Schools
+                    </span>
+
+                    <strong class="summary-value" id="primary-schools">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span class="summary-label">
+                        Other Schools
+                    </span>
+
+                    <strong class="summary-value" id="other-schools">
+
+                        0
+
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- SEARCH -->
+
+            <section class="search-card">
+
+                <input type="text" class="search-input" id="school-search"
+                    placeholder="🔍 Search by school name, county or location...">
+
+            </section>
+
+
+
+            <!-- TABLE -->
+
+            <section class="schools-card">
+
+                <div class="table-wrapper">
+
+                    <table class="schools-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>School Name</th>
+
+                                <th>School Type</th>
+
+                                <th>County</th>
+
+                                <th>Location</th>
+
+                                <th>Students</th>
+
+                                <th>Actions</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="schools-body">
+
+                            <tr>
+
+                                <td colspan="6">
+
+                                    <div class="empty-state">
+
+                                        <div class="empty-icon">
+                                            🏛️
+                                        </div>
+
+                                        <h3>
+                                            No Previous Schools Found
+                                        </h3>
+
+                                        <p>
+                                            Add schools that students attended before joining Kwale High School.
+                                        </p>
+
+                                        <br>
+
+                                        <button class="btn btn-primary" onclick="openAddSchoolModal()">
+
+                                            ➕ Add First School
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+
+    <!-- =========================================
+     ADD / EDIT SCHOOL MODAL
+========================================= -->
+
+    <div class="modal-overlay" id="school-modal">
+
+
+        <div class="modal">
+
+
+            <div class="modal-header">
+
+                <h3 id="modal-title">
+
+                    Add Previous School
+
+                </h3>
+
+
+                <button class="modal-close" id="modal-close">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+
+
+            <form id="school-form">
+
+
+                <div class="modal-body">
+
+
+                    <input type="hidden" id="school-id">
+
+
+                    <!-- SCHOOL NAME -->
+
+                    <div class="form-group">
+
+                        <label for="school-name">
+                            School Name
+                        </label>
+
+                        <input type="text" id="school-name" class="form-control"
+                            placeholder="Example: Mombasa Primary School" required>
+
+                    </div>
+
+
+
+                    <!-- TYPE + COUNTY -->
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="school-type">
+                                School Type
+                            </label>
+
+                            <select id="school-type" class="form-control" required>
+
+                                <option value="">
+                                    Select Type
+                                </option>
+
+                                <option value="PRIMARY">
+                                    Primary School
+                                </option>
+
+                                <option value="JUNIOR_SECONDARY">
+                                    Junior Secondary School
+                                </option>
+
+                                <option value="SECONDARY">
+                                    Secondary School
+                                </option>
+
+                                <option value="OTHER">
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="school-county">
+                                County
+                            </label>
+
+                            <input type="text" id="school-county" class="form-control" placeholder="Example: Kwale">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- LOCATION -->
+
+                    <div class="form-group">
+
+                        <label for="school-location">
+                            Town / Location
+                        </label>
+
+                        <input type="text" id="school-location" class="form-control" placeholder="Example: Matuga">
+
+                    </div>
+
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="modal-actions">
+
+                        <button type="button" class="btn btn-secondary" id="cancel-modal-btn">
+
+                            Cancel
+
+                        </button>
+
+
+                        <button type="submit" class="btn btn-primary">
+
+                            💾 Save School
+
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+    <script src="../auth.js"></script>
+
+    <script src="../dashboard.js"></script>
+
+
+    <script>
+
+        /* =========================================
+           AUTH
+        ========================================= */
+
+        const user = requireAuth();
+
+
+        if (user && user.role !== "admin") {
+
+            window.location.href =
+                user.role + ".html";
+
+        }
+
+
+        if (user) {
+
+            populateTopBar(user);
+
+        }
+
+
+
+        /* =========================================
+           MODAL
+        ========================================= */
+
+        const schoolModal =
+            document.getElementById(
+                "school-modal"
+            );
+
+
+        const addSchoolBtn =
+            document.getElementById(
+                "add-school-btn"
+            );
+
+
+        const modalClose =
+            document.getElementById(
+                "modal-close"
+            );
+
+
+        const cancelModalBtn =
+            document.getElementById(
+                "cancel-modal-btn"
+            );
+
+
+
+        function openAddSchoolModal() {
+
+            document
+                .getElementById("modal-title")
+                .textContent =
+                "Add Previous School";
+
+
+            document
+                .getElementById("school-form")
+                .reset();
+
+
+            document
+                .getElementById("school-id")
+                .value = "";
+
+
+            schoolModal.classList.add("open");
+
+        }
+
+
+
+        function closeSchoolModal() {
+
+            schoolModal.classList.remove("open");
+
+        }
+
+
+
+        addSchoolBtn.addEventListener(
+            "click",
+            openAddSchoolModal
+        );
+
+
+        modalClose.addEventListener(
+            "click",
+            closeSchoolModal
+        );
+
+
+        cancelModalBtn.addEventListener(
+            "click",
+            closeSchoolModal
+        );
+
+
+
+        schoolModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (event.target === schoolModal) {
+
+                    closeSchoolModal();
+
+                }
+
+            }
+        );
+
+
+
+        /* =========================================
+           FORM SUBMISSION
+    
+           TEMPORARY FRONTEND ONLY
+    
+           Future:
+    
+           POST /previous-schools
+    
+           PUT /previous-schools/{school_id}
+        ========================================= */
+
+        document
+            .getElementById("school-form")
+            .addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    const schoolId =
+                        document
+                            .getElementById("school-id")
+                            .value;
+
+
+                    const schoolName =
+                        document
+                            .getElementById("school-name")
+                            .value;
+
+
+                    const schoolType =
+                        document
+                            .getElementById("school-type")
+                            .value;
+
+
+                    const county =
+                        document
+                            .getElementById("school-county")
+                            .value;
+
+
+                    const location =
+                        document
+                            .getElementById("school-location")
+                            .value;
+
+
+                    console.log({
+
+                        schoolId,
+                        schoolName,
+                        schoolType,
+                        county,
+                        location
+
+                    });
+
+
+                    /*
+                    =========================================
+    
+                    FUTURE FASTAPI REQUEST
+    
+                    await fetch(
+                        "http://127.0.0.1:8000/previous-schools",
+                        {
+                            method: "POST",
+    
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+    
+                            body: JSON.stringify({
+    
+                                school_name: schoolName,
+    
+                                school_type: schoolType,
+    
+                                county: county,
+    
+                                location: location
+    
+                            })
+    
+                        }
+                    );
+    
+                    =========================================
+                    */
+
+
+                    alert(
+                        "Previous school saved successfully!"
+                    );
+
+
+                    closeSchoolModal();
+
+                }
+            );
+
+
+
+        /* =========================================
+           SEARCH
+    
+           This will work when the table
+           contains data.
+        ========================================= */
+
+        document
+            .getElementById("school-search")
+            .addEventListener(
+                "input",
+                function () {
+
+                    const searchValue =
+                        this.value
+                            .toLowerCase();
+
+                    console.log(
+                        "Searching:",
+                        searchValue
+                    );
+
+
+                    /*
+                    Future:
+    
+                    GET /previous-schools?search=
+    
+                    OR filter the loaded schools
+                    using JavaScript.
+                    */
+
+                }
+            );
+
+    </script>
+
+
+</body>
+
+</html>

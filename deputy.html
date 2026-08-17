@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deputy Principal Dashboard – Kwale High School</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Deputy Principal Dashboard</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">?</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Loading...</span>
+                    <span class="u-role" id="user-role">Deputy</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h2 id="welcome-msg">Deputy Principal Portal</h2>
+            <p>Manage discipline, attendance, and academics</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Active Students</div>
+                    <div class="stat-value" id="val-students">—</div>
+                </div>
+                <div class="stat-icon blue">🎓</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Today's Attendance</div>
+                    <div class="stat-value" style="color:var(--green-dark);">90%</div>
+                </div>
+                <div class="stat-icon green">✅</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Discipline Cases</div>
+                    <div class="stat-value" style="color:var(--danger);">2</div>
+                    <div class="stat-sub">Pending</div>
+                </div>
+                <div class="stat-icon red">⚖️</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Teaching Staff</div>
+                    <div class="stat-value" id="val-teachers">—</div>
+                </div>
+                <div class="stat-icon gray">👨‍🏫</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Pending Discipline Cases</span>
+                </div>
+                <div class="task-list">
+                    <div class="empty-state" style="padding:20px;">
+                        <div class="es-icon">⚖️</div>
+                        <div class="es-text">No pending cases.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Recent Notices</span>
+                </div>
+                <div class="task-list" id="notices-list">
+                    <div class="empty-state" style="padding:20px;"><div class="es-text">Loading notices...</div></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="auth.js"></script>
+<script src="dashboard.js"></script>
+<script>
+const user = requireAuth(['deputy_principal', 'admin', 'principal']);
+if (user) {
+    populateTopBar(user);
+}
+
+async function loadStats() {
+    const stats = await apiFetch('/api/stats/dashboard');
+    if (stats) {
+        document.getElementById('val-students').textContent = stats.students || 0;
+        document.getElementById('val-teachers').textContent = stats.teachers || 0;
+    }
+}
+
+async function loadNotices() {
+    const list = document.getElementById('notices-list');
+    const notices = await apiFetch('/api/notices?limit=4');
+    if (!notices || !notices.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="es-text">No notices</div></div>';
+        return;
+    }
+    
+    list.innerHTML = notices.map(n => `
+        <div class="task-item ${n.is_pinned ? 'warn' : 'info'}">
+            <div class="ti-icon">${n.is_pinned ? '📌' : '📢'}</div>
+            <div>
+                <div class="ti-text">${n.title}</div>
+                <div class="ti-sub">${n.body.substring(0, 60)}...</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+loadStats();
+loadNotices();
+</script>
+</body>
+</html>

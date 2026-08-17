@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dormitories – Kwale High School SMS</title>
+    <meta name="description" content="Manage school dormitories and boarding student assignments.">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        /* Dorm cards grid */
+        .dorm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .dorm-card {
+            background: var(--white);
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+            transition: transform .2s, box-shadow .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .dorm-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .dorm-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        .dorm-card.boys::before  { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+        .dorm-card.girls::before { background: linear-gradient(90deg, #db2777, #f9a8d4); }
+        .dorm-card.mixed::before { background: linear-gradient(90deg, var(--green-dark), var(--green)); }
+
+        .dorm-header {
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 10px;
+            margin-bottom: 14px;
+        }
+        .dorm-name { font-size: 15px; font-weight: 700; color: var(--dark); }
+        .dorm-type {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            padding: 3px 9px; border-radius: 20px; letter-spacing:.06em;
+        }
+        .dorm-type.boys  { background: #eff6ff; color: #2563eb; }
+        .dorm-type.girls { background: #fdf2f8; color: #db2777; }
+        .dorm-type.mixed { background: var(--green-light); color: var(--green-dark); }
+
+        .dorm-stats {
+            display: flex; gap: 16px; margin-bottom: 14px;
+        }
+        .ds-item { display: flex; flex-direction: column; gap: 3px; }
+        .ds-label { font-size: 10px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
+        .ds-value { font-size: 20px; font-weight: 700; color: var(--dark); line-height:1; }
+
+        .dorm-progress-label {
+            display: flex; justify-content: space-between;
+            font-size: 11px; color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .dorm-progress-track {
+            height: 8px; background: var(--gray-border);
+            border-radius: 20px; overflow: hidden;
+        }
+        .dorm-progress-fill {
+            height: 100%; border-radius: 20px;
+            transition: width .8s ease;
+        }
+
+        /* Boarder table (lower section) */
+        .dorm-occupancy-card { margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Dormitories</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:22px;">
+            <div>
+                <h2>Dormitory Management</h2>
+                <p>Overview of all school dormitories and boarder capacity</p>
+            </div>
+        </div>
+
+        <!-- Summary stat cards -->
+        <div class="stats-grid" style="margin-bottom:24px;">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Dormitories</div>
+                    <div class="stat-value" id="val-dorms">—</div>
+                    <div class="stat-sub">All blocks</div>
+                </div>
+                <div class="stat-icon blue">🛏️</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Capacity</div>
+                    <div class="stat-value" id="val-capacity">—</div>
+                    <div class="stat-sub">Available beds</div>
+                </div>
+                <div class="stat-icon green">📋</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Current Boarders</div>
+                    <div class="stat-value" id="val-occupied">—</div>
+                    <div class="stat-sub" id="sub-occupied">—</div>
+                </div>
+                <div class="stat-icon amber">👤</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Available Spaces</div>
+                    <div class="stat-value" id="val-available">—</div>
+                    <div class="stat-sub">Open beds</div>
+                </div>
+                <div class="stat-icon gray">✅</div>
+            </div>
+        </div>
+
+        <!-- Dorm cards -->
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--dark);">Dormitory Blocks</h3>
+        <div class="dorm-grid" id="dorm-grid">
+            <div class="empty-state"><div class="es-icon">🛏️</div><div class="es-text">Loading dormitories…</div></div>
+        </div>
+
+        <!-- Occupancy table -->
+        <div class="card dorm-occupancy-card">
+            <div class="card-header">
+                <span class="card-title">Occupancy Summary Table</span>
+                <span class="card-badge" id="dorm-term">Current Term</span>
+            </div>
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:500px;">
+                    <thead>
+                        <tr>
+                            <th>Dormitory</th>
+                            <th>Gender</th>
+                            <th>Capacity</th>
+                            <th>Occupied</th>
+                            <th>Available</th>
+                            <th>Occupancy %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dorm-table-body">
+                        <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+
+function pct(occupied, capacity) {
+    if (!capacity) return 0;
+    return Math.round((occupied / capacity) * 100);
+}
+
+function fillColor(p) {
+    if (p >= 95) return '#e53e3e';
+    if (p >= 80) return '#d97706';
+    return 'var(--green)';
+}
+
+async function loadDormitories() {
+    const dorms = await apiFetch('/api/dormitories');
+    if (!dorms || !dorms.length) {
+        document.getElementById('dorm-grid').innerHTML =
+            '<div class="empty-state"><div class="es-icon">🛏️</div><div class="es-text">No dormitories found.</div><div class="es-sub">Add dormitories in the database.</div></div>';
+        return;
+    }
+
+    // Summary
+    const totalCapacity = dorms.reduce((s,d) => s + (d.capacity || 0), 0);
+    const totalOccupied = dorms.reduce((s,d) => s + (d.occupied || 0), 0);
+    const totalAvail    = dorms.reduce((s,d) => s + (d.available || 0), 0);
+
+    document.getElementById('val-dorms').textContent     = dorms.length;
+    document.getElementById('val-capacity').textContent  = totalCapacity;
+    document.getElementById('val-occupied').textContent  = totalOccupied;
+    document.getElementById('val-available').textContent = totalAvail;
+    document.getElementById('sub-occupied').textContent  = `${pct(totalOccupied, totalCapacity)}% full`;
+
+    // Cards
+    const grid = document.getElementById('dorm-grid');
+    grid.innerHTML = dorms.map(d => {
+        const gender   = (d.gender || 'MIXED').toLowerCase();
+        const occupied = Number(d.occupied) || 0;
+        const capacity = Number(d.capacity) || 0;
+        const avail    = Number(d.available) || 0;
+        const p        = pct(occupied, capacity);
+        const color    = fillColor(p);
+        const cls      = gender === 'male' ? 'boys' : gender === 'female' ? 'girls' : 'mixed';
+        const typeLabel= gender === 'male' ? 'Boys' : gender === 'female' ? 'Girls' : 'Mixed';
+
+        return `
+            <div class="dorm-card ${cls}">
+                <div class="dorm-header">
+                    <div class="dorm-name">🛏️ ${d.name}</div>
+                    <span class="dorm-type ${cls}">${typeLabel}</span>
+                </div>
+                <div class="dorm-stats">
+                    <div class="ds-item">
+                        <span class="ds-label">Capacity</span>
+                        <span class="ds-value">${capacity}</span>
+                    </div>
+                    <div class="ds-item">
+                        <span class="ds-label">Occupied</span>
+                        <span class="ds-value" style="color:${color}">${occupied}</span>
+                    </div>
+                    <div class="ds-item">
+                        <span class="ds-label">Available</span>
+                        <span class="ds-value" style="color:var(--green-dark)">${avail}</span>
+                    </div>
+                </div>
+                <div class="dorm-progress-label">
+                    <span>Occupancy</span>
+                    <span>${p}%</span>
+                </div>
+                <div class="dorm-progress-track">
+                    <div class="dorm-progress-fill" style="width:${p}%;background:${color};"></div>
+                </div>
+            </div>`;
+    }).join('');
+
+    // Table
+    const tbody = document.getElementById('dorm-table-body');
+    tbody.innerHTML = dorms.map(d => {
+        const occupied = Number(d.occupied) || 0;
+        const capacity = Number(d.capacity) || 0;
+        const avail    = Number(d.available) || 0;
+        const p        = pct(occupied, capacity);
+        const badgeCls = p >= 95 ? 'inactive' : p >= 80 ? 'leave' : 'active';
+        return `<tr>
+            <td style="font-weight:600;">${d.name}</td>
+            <td style="text-transform:capitalize;">${(d.gender || 'Mixed').toLowerCase()}</td>
+            <td>${capacity}</td>
+            <td>${occupied}</td>
+            <td>${avail}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="progress-track" style="max-width:100px;">
+                        <div class="progress-fill ${p>=95?'full':p>=80?'warn':''}" style="width:${p}%"></div>
+                    </div>
+                    <span class="badge ${badgeCls}">${p}%</span>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+loadDormitories();
+</script>
+</body>
+</html>

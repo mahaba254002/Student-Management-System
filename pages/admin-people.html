@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Directory – Kwale High School SMS</title>
+    <meta name="description" content="View and manage all staff at Kwale High School.">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .role-tag {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .05em;
+            white-space: nowrap;
+        }
+        .role-tag.PRINCIPAL        { background:#e8f0fe; color:#1d4ed8; }
+        .role-tag.DEPUTY_PRINCIPAL { background:#f0e8fe; color:#7c3aed; }
+        .role-tag.HOD              { background:var(--green-light); color:var(--green-dark); }
+        .role-tag.CLASS_TEACHER    { background:#e8f0fe; color:#0369a1; }
+        .role-tag.SUBJECT_TEACHER  { background:#f4f6f9; color:#4a5568; }
+        .role-tag.ADMIN            { background:#fef9e7; color:#d97706; }
+        .role-tag.ACCOUNTANT       { background:#fde8e8; color:#b91c1c; }
+        .role-tag.SECRETARY        { background:#f0e8fe; color:#7c3aed; }
+        .role-tag.LIBRARIAN        { background:#e8f0fe; color:#0369a1; }
+        .role-tag.COOK,.role-tag.CHEF  { background:#fff7ed; color:#c2410c; }
+        .role-tag.SECURITY         { background:#f4f6f9; color:#374151; }
+        .role-tag.DRIVER           { background:#ecfdf5; color:#065f46; }
+        .role-tag.CLEANER          { background:#f4f6f9; color:#6b7280; }
+        .role-tag.OTHER            { background:#f4f6f9; color:#9ca3af; }
+
+        .dept-tag {
+            font-size: 11px; color: var(--text-muted);
+            background: var(--gray-light); padding: 2px 8px;
+            border-radius: 8px; white-space:nowrap;
+        }
+
+        .stat-pills { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+        .stat-pill  {
+            padding:6px 16px; border-radius:20px; font-size:12px; font-weight:600;
+            cursor:pointer; border:1.5px solid var(--gray-border);
+            background:var(--white); color:var(--text-muted); transition:all .2s;
+        }
+        .stat-pill.active { background:var(--green); color:#fff; border-color:var(--green); }
+        .stat-pill:hover:not(.active) { border-color:var(--green); color:var(--green-dark); }
+
+        .empty-row td { text-align:center; padding:40px; color:var(--text-muted); }
+
+        @media(max-width:600px) {
+            .page-toolbar { flex-direction:column; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<!-- Add Staff Drawer -->
+<div class="drawer-overlay" id="add-staff-overlay" onclick="KHS.closeDrawer('add-staff-drawer','add-staff-overlay')"></div>
+<div class="drawer" id="add-staff-drawer">
+    <div class="drawer-header">
+        <span class="drawer-title">Add New Staff Member</span>
+        <button class="drawer-close" onclick="KHS.closeDrawer('add-staff-drawer','add-staff-overlay')">✕</button>
+    </div>
+    <div class="drawer-body">
+        <form id="add-staff-form" onsubmit="createStaffMember(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">First Name *</label>
+                    <input class="form-input" type="text" id="new-fname" placeholder="e.g. Samuel" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    <input class="form-input" type="text" id="new-lname" placeholder="e.g. Ochieng" required>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Employment Type *</label>
+                    <select class="form-select" id="new-emptype" onchange="toggleEmploymentTypeFields()">
+                        <option value="TEACHING">Teaching Staff</option>
+                        <option value="NON_TEACHING">Non-Teaching Staff</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role *</label>
+                    <select class="form-select" id="new-role">
+                        <option value="SUBJECT_TEACHER">Subject Teacher</option>
+                        <option value="CLASS_TEACHER">Class Teacher</option>
+                        <option value="HOD">Head of Department</option>
+                        <option value="DEPUTY_PRINCIPAL">Deputy Principal</option>
+                        <option value="PRINCIPAL">Principal</option>
+                        <option value="ADMIN">Administrator</option>
+                        <option value="ACCOUNTANT">Accountant</option>
+                        <option value="LIBRARIAN">Librarian</option>
+                        <option value="SECRETARY">Secretary</option>
+                        <option value="CHEF">Chef / Cook</option>
+                        <option value="SECURITY">Security Guard</option>
+                        <option value="DRIVER">Driver</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Department *</label>
+                    <input class="form-input" type="text" id="new-dept" placeholder="e.g. Mathematics, Sciences, Support" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number *</label>
+                    <input class="form-input" type="tel" id="new-phone" placeholder="+254 7..." required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input class="form-input" type="email" id="new-email" placeholder="staff@kwalehigh.ac.ke" required>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">National ID</label>
+                    <input class="form-input" type="text" id="new-natid" placeholder="e.g. 29384756">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" id="new-gender">
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid" id="teaching-fields-box">
+                <div class="form-group">
+                    <label class="form-label">TSC Number</label>
+                    <input class="form-input" type="text" id="new-tsc" placeholder="e.g. TSC/12345">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Qualification</label>
+                    <input class="form-input" type="text" id="new-qualification" placeholder="e.g. B.Ed Science">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Employment Date</label>
+                    <input class="form-input" type="date" id="new-empdate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contract Type</label>
+                    <select class="form-select" id="new-contract">
+                        <option value="PERMANENT">Permanent</option>
+                        <option value="CONTRACT">Contract</option>
+                        <option value="INTERN">Intern</option>
+                        <option value="PART_TIME">Part-Time</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">County</label>
+                <input class="form-input" type="text" id="new-county" placeholder="e.g. Kwale">
+            </div>
+
+            <div style="margin-top:24px; display:flex; gap:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1">Add Staff Member</button>
+                <button type="button" class="btn btn-outline" onclick="KHS.closeDrawer('add-staff-drawer','add-staff-overlay')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="page-title">Staff Directory</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+            <div>
+                <h2 id="section-title">All Staff</h2>
+                <p id="section-desc">All teaching and non-teaching staff at Kwale High School</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddStaffDrawer()">➕ Add Staff Member</button>
+        </div>
+
+        <!-- Type filter pills -->
+        <div class="stat-pills" id="type-pills">
+            <button class="stat-pill active" data-type="">All Staff</button>
+            <button class="stat-pill" data-type="TEACHING">Teaching</button>
+            <button class="stat-pill" data-type="NON_TEACHING">Non-Teaching</button>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="page-toolbar">
+            <div class="search-bar" style="flex:1;max-width:420px;">
+                <span>🔍</span>
+                <input type="text" id="search-input" placeholder="Search by name, email, staff no…" autocomplete="off">
+            </div>
+            <select class="form-select" id="filter-role" style="min-width:160px;">
+                <option value="">All Roles</option>
+                <option value="PRINCIPAL">Principal</option>
+                <option value="DEPUTY_PRINCIPAL">Deputy Principal</option>
+                <option value="HOD">Head of Department</option>
+                <option value="CLASS_TEACHER">Class Teacher</option>
+                <option value="SUBJECT_TEACHER">Subject Teacher</option>
+                <option value="ADMIN">Admin</option>
+                <option value="ACCOUNTANT">Accountant</option>
+                <option value="SECRETARY">Secretary</option>
+                <option value="LIBRARIAN">Librarian</option>
+                <option value="COOK">Cook</option>
+                <option value="CHEF">Chef</option>
+                <option value="SECURITY">Security</option>
+                <option value="DRIVER">Driver</option>
+                <option value="CLEANER">Cleaner</option>
+            </select>
+            <select class="form-select" id="filter-status" style="min-width:130px;">
+                <option value="">All Statuses</option>
+                <option value="ACTIVE">Active</option>
+                <option value="ON_LEAVE">On Leave</option>
+                <option value="SUSPENDED">Suspended</option>
+                <option value="TERMINATED">Terminated</option>
+            </select>
+            <button class="btn btn-outline" id="btn-clear">Clear</button>
+        </div>
+
+        <!-- Results info -->
+        <p id="results-info" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Loading…</p>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-scroll">
+                <table class="data-table" style="min-width:680px;">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Staff No.</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th style="text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-body">
+                        <tr class="empty-row"><td colspan="7">Loading staff…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal']);
+if (user) populateTopBar(user);
+
+// ── Demo staff fallback data ──────────────────────────────────────
+const DEMO_STAFF = [
+    { id: 1, first_name: "David", last_name: "Njoroge", staff_number: "T-024", role: "CLASS_TEACHER", employment_type: "TEACHING", department: "Mathematics", phone: "+254 712 345 678", email: "david.njoroge@kwalehigh.ac.ke", status: "ACTIVE", subjects: ["Mathematics", "Physics"] },
+    { id: 2, first_name: "Fatuma", last_name: "Mwangi", staff_number: "T-001", role: "PRINCIPAL", employment_type: "TEACHING", department: "Administration", phone: "+254 722 111 222", email: "principal@kwalehigh.ac.ke", status: "ACTIVE", subjects: ["History"] },
+    { id: 3, first_name: "Hassan", last_name: "Kirui", staff_number: "T-002", role: "DEPUTY_PRINCIPAL", employment_type: "TEACHING", department: "Administration", phone: "+254 733 222 333", email: "deputy@kwalehigh.ac.ke", status: "ACTIVE", subjects: ["Geography"] },
+    { id: 4, first_name: "Grace", last_name: "Otieno", staff_number: "T-015", role: "HOD", employment_type: "TEACHING", department: "Mathematics", phone: "+254 744 333 444", email: "grace.otieno@kwalehigh.ac.ke", status: "ACTIVE", subjects: ["Mathematics"] },
+    { id: 5, first_name: "Salim", last_name: "Omar", staff_number: "S-005", role: "ADMIN", employment_type: "NON_TEACHING", department: "IT & Administration", phone: "+254 755 444 555", email: "admin@kwalehigh.ac.ke", status: "ACTIVE", subjects: [] },
+    { id: 6, first_name: "Amina", last_name: "Suleiman", staff_number: "S-012", role: "ACCOUNTANT", employment_type: "NON_TEACHING", department: "Finance", phone: "+254 766 555 666", email: "accounts@kwalehigh.ac.ke", status: "ACTIVE", subjects: [] },
+    { id: 7, first_name: "John", last_name: "Bakari", staff_number: "S-033", role: "CHEF", employment_type: "NON_TEACHING", department: "Catering", phone: "+254 777 666 777", email: "catering@kwalehigh.ac.ke", status: "ACTIVE", subjects: [] },
+    { id: 8, first_name: "Ali", last_name: "Kombo", staff_number: "S-041", role: "SECURITY", employment_type: "NON_TEACHING", department: "Security", phone: "+254 788 777 888", email: "security@kwalehigh.ac.ke", status: "ACTIVE", subjects: [] },
+    { id: 9, first_name: "Mary", last_name: "Wambua", staff_number: "T-038", role: "SUBJECT_TEACHER", employment_type: "TEACHING", department: "Languages", phone: "+254 799 888 999", email: "mary.wambua@kwalehigh.ac.ke", status: "ON_LEAVE", subjects: ["English", "Literature"] }
+];
+
+// ── Handle ?type= URL param ───────────────────────────────────────
+const urlType = new URLSearchParams(window.location.search).get('type') || '';
+let activeType = '';
+
+if (urlType === 'teachers') {
+    activeType = 'TEACHING';
+    document.getElementById('section-title').textContent = 'Teaching Staff';
+    document.getElementById('section-desc').textContent  = 'All teachers including principal, deputy, HODs and class/subject teachers';
+    document.getElementById('page-title').textContent    = 'Teaching Staff';
+} else if (urlType === 'nonteaching') {
+    activeType = 'NON_TEACHING';
+    document.getElementById('section-title').textContent = 'Non-Teaching Staff';
+    document.getElementById('section-desc').textContent  = 'Support staff: admin, kitchen, security, maintenance, transport';
+    document.getElementById('page-title').textContent    = 'Non-Teaching Staff';
+}
+
+// Sync pill
+document.querySelectorAll('.stat-pill').forEach(p => {
+    if (p.dataset.type === activeType) p.classList.add('active');
+    else p.classList.remove('active');
+});
+
+function showToast(msg, isSuccess = true) {
+    const t = document.getElementById('khs-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'show ' + (isSuccess ? 'success' : 'error');
+    setTimeout(() => { t.className = ''; }, 3000);
+}
+
+function openAddStaffDrawer() {
+    KHS.openDrawer('add-staff-drawer', 'add-staff-overlay');
+}
+
+function toggleEmploymentTypeFields() {
+    const type = document.getElementById('new-emptype').value;
+    const teachBox = document.getElementById('teaching-fields-box');
+    if (type === 'NON_TEACHING') {
+        if (teachBox) teachBox.style.display = 'none';
+    } else {
+        if (teachBox) teachBox.style.display = 'grid';
+    }
+}
+
+async function createStaffMember(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    const origText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    const data = {
+        first_name:      document.getElementById('new-fname').value.trim(),
+        last_name:       document.getElementById('new-lname').value.trim(),
+        employment_type: document.getElementById('new-emptype').value,
+        role:            document.getElementById('new-role').value,
+        department:      document.getElementById('new-dept').value.trim(),
+        phone:           document.getElementById('new-phone').value.trim(),
+        email:           document.getElementById('new-email').value.trim(),
+        national_id:     document.getElementById('new-natid').value.trim() || null,
+        gender:          document.getElementById('new-gender').value,
+        tsc_number:      document.getElementById('new-tsc').value.trim() || null,
+        qualification:   document.getElementById('new-qualification').value.trim() || null,
+        employment_date: document.getElementById('new-empdate').value || null,
+        contract_type:   document.getElementById('new-contract').value,
+        county:          document.getElementById('new-county').value.trim() || null,
+    };
+
+    try {
+        const result = await apiFetch('/api/staff', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+
+        if (result && result.id) {
+            KHS.closeDrawer('add-staff-drawer', 'add-staff-overlay');
+            document.getElementById('add-staff-form').reset();
+            showToast(`Staff member "${data.first_name} ${data.last_name}" added successfully!`, true);
+            loadStaff();
+        } else {
+            showToast('Failed to add staff member. Please try again.', false);
+        }
+    } catch (err) {
+        showToast('Error: ' + (err.message || 'Unknown error'), false);
+    } finally {
+        btn.disabled = false; btn.textContent = origText;
+    }
+}
+
+// ── Load staff ────────────────────────────────────────────────────
+async function loadStaff() {
+    const tbody  = document.getElementById('staff-body');
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Loading…</td></tr>';
+
+    const search = document.getElementById('search-input').value.trim().toLowerCase();
+    const role   = document.getElementById('filter-role').value;
+    const status = document.getElementById('filter-status').value;
+
+    let data = null;
+    try {
+        let url = `/api/staff?limit=200`;
+        if (activeType) url += `&employment_type=${activeType}`;
+        if (search)     url += `&search=${encodeURIComponent(search)}`;
+        if (role)       url += `&role=${role}`;
+        if (status)     url += `&status=${status}`;
+        data = await apiFetch(url);
+    } catch (e) {
+        console.warn('Using demo staff fallback');
+    }
+
+    if (!data || !data.length) {
+        // Fallback filter
+        data = DEMO_STAFF.filter(s => {
+            if (activeType && s.employment_type !== activeType) return false;
+            if (role && s.role !== role) return false;
+            if (status && s.status !== status) return false;
+            if (search) {
+                const term = `${s.first_name} ${s.last_name} ${s.staff_number} ${s.email} ${s.department}`.toLowerCase();
+                if (!term.includes(search)) return false;
+            }
+            return true;
+        });
+    }
+
+    document.getElementById('results-info').textContent = `${data.length} staff member${data.length !== 1 ? 's' : ''} found`;
+
+    if (!data.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No staff found matching filters.</td></tr>';
+        return;
+    }
+
+    const statusClass = { ACTIVE:'active', ON_LEAVE:'leave', SUSPENDED:'inactive', TERMINATED:'inactive', RETIRED:'inactive' };
+
+    tbody.innerHTML = data.map(s => {
+        const fullName = [s.first_name, s.last_name].join(' ');
+        const initials = ((s.first_name ? s.first_name[0] : '') + (s.last_name ? s.last_name[0] : 'DN')).toUpperCase();
+        const cls = statusClass[s.status] || 'active';
+        const subjects = (s.subjects || []).filter(Boolean).join(', ');
+        return `<tr>
+            <td>
+                <div class="staff-cell">
+                    <div class="staff-avatar">${initials}</div>
+                    <div>
+                        <div class="staff-name">${fullName}</div>
+                        <div class="staff-emp">${subjects || s.qualification || s.email || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="font-family:monospace;font-size:11px;color:var(--text-muted);">${s.staff_number}</td>
+            <td><span class="role-tag ${s.role}">${s.role.replace(/_/g,' ')}</span></td>
+            <td><span class="dept-tag">${s.department || '—'}</span></td>
+            <td style="font-size:12px;">${s.phone || s.phone_number || '—'}</td>
+            <td><span class="badge ${cls}">${s.status.replace(/_/g,' ')}</span></td>
+            <td style="text-align:center;">
+                <a href="admin-staff-detail.html?id=${s.id}" class="btn btn-outline btn-sm">View</a>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// ── Events ────────────────────────────────────────────────────────
+document.querySelectorAll('.stat-pill').forEach(p => {
+    p.addEventListener('click', () => {
+        document.querySelectorAll('.stat-pill').forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        activeType = p.dataset.type;
+        loadStaff();
+    });
+});
+
+let debounce;
+document.getElementById('search-input').addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(loadStaff, 350);
+});
+document.getElementById('filter-role').addEventListener('change', loadStaff);
+document.getElementById('filter-status').addEventListener('change', loadStaff);
+document.getElementById('btn-clear').addEventListener('click', () => {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-role').value  = '';
+    document.getElementById('filter-status').value = '';
+    loadStaff();
+});
+
+loadStaff();
+</script>
+</body>
+</html>

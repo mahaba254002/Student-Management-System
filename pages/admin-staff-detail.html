@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Profile – Kwale High School</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .profile-banner {
+            background: linear-gradient(135deg, var(--green-dark), #057a51);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            color: var(--white);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .profile-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .profile-avatar-xl {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            border: 3px solid rgba(255,255,255,0.4);
+            flex-shrink: 0;
+            color: #fff;
+        }
+        .profile-title-area h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .profile-title-area p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .profile-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .badge-white {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .role-tag {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .05em;
+            white-space: nowrap;
+        }
+        .role-tag.PRINCIPAL        { background:#e8f0fe; color:#1d4ed8; }
+        .role-tag.DEPUTY_PRINCIPAL { background:#f0e8fe; color:#7c3aed; }
+        .role-tag.HOD              { background:var(--green-light); color:var(--green-dark); }
+        .role-tag.CLASS_TEACHER    { background:#e8f0fe; color:#0369a1; }
+        .role-tag.SUBJECT_TEACHER  { background:#f4f6f9; color:#4a5568; }
+        .role-tag.ADMIN            { background:#fef9e7; color:#d97706; }
+        .role-tag.ACCOUNTANT       { background:#fde8e8; color:#b91c1c; }
+        .role-tag.SECRETARY        { background:#f0e8fe; color:#7c3aed; }
+        .role-tag.LIBRARIAN        { background:#e8f0fe; color:#0369a1; }
+        .role-tag.COOK,.role-tag.CHEF  { background:#fff7ed; color:#c2410c; }
+        .role-tag.SECURITY         { background:#f4f6f9; color:#374151; }
+        .role-tag.DRIVER           { background:#ecfdf5; color:#065f46; }
+        .role-tag.CLEANER          { background:#f4f6f9; color:#6b7280; }
+        .role-tag.OTHER            { background:#f4f6f9; color:#9ca3af; }
+
+        @media(max-width: 768px) {
+            .profile-banner { flex-direction: column; align-items: flex-start; }
+            .profile-meta { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<!-- Edit Staff Drawer -->
+<div class="drawer-overlay" id="edit-drawer-overlay" onclick="KHS.closeDrawer('edit-staff-drawer','edit-drawer-overlay')"></div>
+<div class="drawer" id="edit-staff-drawer">
+    <div class="drawer-header">
+        <span class="drawer-title" id="drawer-heading">Edit Staff Member</span>
+        <button class="drawer-close" onclick="KHS.closeDrawer('edit-staff-drawer','edit-drawer-overlay')">✕</button>
+    </div>
+    <div class="drawer-body">
+        <form id="edit-staff-form" onsubmit="saveStaffChanges(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">First Name *</label>
+                    <input class="form-input" type="text" id="edit-fname" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    <input class="form-input" type="text" id="edit-lname" required>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Staff Number (Read-only)</label>
+                    <input class="form-input" type="text" id="edit-staffno" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" id="edit-status">
+                        <option value="ACTIVE">Active</option>
+                        <option value="ON_LEAVE">On Leave</option>
+                        <option value="SUSPENDED">Suspended</option>
+                        <option value="TERMINATED">Terminated</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input class="form-input" type="text" id="edit-dept" placeholder="e.g. Mathematics, Sciences">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" id="edit-role">
+                        <option value="SUBJECT_TEACHER">Subject Teacher</option>
+                        <option value="CLASS_TEACHER">Class Teacher</option>
+                        <option value="HOD">Head of Department</option>
+                        <option value="DEPUTY_PRINCIPAL">Deputy Principal</option>
+                        <option value="PRINCIPAL">Principal</option>
+                        <option value="ADMIN">Administrator</option>
+                        <option value="ACCOUNTANT">Accountant</option>
+                        <option value="LIBRARIAN">Librarian</option>
+                        <option value="SECRETARY">Secretary</option>
+                        <option value="CHEF">Chef / Cook</option>
+                        <option value="SECURITY">Security Guard</option>
+                        <option value="DRIVER">Driver</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone Number *</label>
+                <input class="form-input" type="tel" id="edit-phone" placeholder="+254 7..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input class="form-input" type="email" id="edit-email" placeholder="staff@kwalehigh.ac.ke">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">National ID / Passport</label>
+                    <input class="form-input" type="text" id="edit-natid" placeholder="e.g. 12345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" id="edit-gender">
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" id="edit-subjects-group">
+                <label class="form-label">Assigned Subjects (comma separated)</label>
+                <input class="form-input" type="text" id="edit-subjects" placeholder="e.g. Mathematics, Physics">
+            </div>
+
+            <div class="form-group" id="edit-classes-group">
+                <label class="form-label">Assigned Classes (comma separated)</label>
+                <input class="form-input" type="text" id="edit-classes" placeholder="e.g. Form 3 North, Form 4 East">
+            </div>
+
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1">💾 Save Changes</button>
+                <button type="button" class="btn btn-outline" onclick="KHS.closeDrawer('edit-staff-drawer','edit-drawer-overlay')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Staff Profile</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+            <a href="admin-people.html?type=all" class="btn btn-outline btn-sm">← Back to Staff Directory</a>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary btn-sm" onclick="openEditStaffDrawer()">✏️ Edit Profile</button>
+            </div>
+        </div>
+
+        <div id="profile-container">
+            <div class="empty-state"><div class="es-icon">👥</div><div class="es-text">Loading staff profile...</div></div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal', 'hod']);
+if (user) populateTopBar(user);
+
+const urlParams = new URLSearchParams(window.location.search);
+const staffId = urlParams.get('id') || '1';
+
+// Current active profile cache
+let currentStaff = null;
+
+// Offline fallback mock data for staff member
+const DEMO_STAFF_RECORD = {
+    id: 1,
+    first_name: "David",
+    last_name: "Njoroge",
+    staff_number: "T-024",
+    role: "CLASS_TEACHER",
+    employment_type: "TEACHING",
+    department: "Mathematics",
+    phone_number: "+254 712 345 678",
+    email: "david.njoroge@kwalehigh.ac.ke",
+    national_id: "24890123",
+    gender: "MALE",
+    hire_date: "2019-01-15",
+    status: "ACTIVE",
+    qualification: "B.Ed Science (Maths / Physics)",
+    subjects: ["Mathematics", "Physics"],
+    classes: ["Form 3 North", "Form 4 East"],
+    is_class_teacher: true,
+    class_teacher_of: "Form 3 North"
+};
+
+function showToast(msg, isSuccess = true) {
+    const t = document.getElementById('khs-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'show ' + (isSuccess ? 'success' : 'error');
+    setTimeout(() => { t.className = ''; }, 3000);
+}
+
+async function loadProfile() {
+    const container = document.getElementById('profile-container');
+
+    // Try fetching from API or custom query
+    let staff = null;
+    try {
+        const staffData = await apiFetch(`/api/staff/${staffId}`);
+        if (staffData && staffData.id) {
+            staff = staffData;
+        }
+    } catch (e) {
+        console.warn('Using demo staff profile');
+    }
+
+    if (!staff) {
+        staff = DEMO_STAFF_RECORD;
+    }
+
+    currentStaff = staff;
+    renderProfile(currentStaff);
+}
+
+function renderProfile(s) {
+    const container = document.getElementById('profile-container');
+    const fullName = [s.first_name, s.last_name].filter(Boolean).join(' ');
+    const initials = ((s.first_name ? s.first_name[0] : '') + (s.last_name ? s.last_name[0] : 'DN')).toUpperCase();
+    
+    let statusCls = 'active';
+    if (s.status === 'ON_LEAVE') statusCls = 'leave';
+    if (s.status === 'TERMINATED' || s.status === 'SUSPENDED' || s.status === 'RESIGNED') statusCls = 'inactive';
+
+    const typeLbl = s.employment_type === 'TEACHING' ? 'Teaching Staff' : 'Non-Teaching Staff';
+    const subjects = (Array.isArray(s.subjects) ? s.subjects : (s.subjects || '').split(',')).filter(Boolean);
+    const classes = (Array.isArray(s.classes) ? s.classes : (s.classes || '').split(',')).filter(Boolean);
+
+    container.innerHTML = `
+        <!-- Profile Banner -->
+        <div class="profile-banner">
+            <div class="profile-meta">
+                <div class="profile-avatar-xl">${initials}</div>
+                <div class="profile-title-area">
+                    <h2>${fullName}</h2>
+                    <p>${s.role ? s.role.replace(/_/g, ' ') : 'Staff'} • ${s.department || 'General'} • Staff No: <strong>${s.staff_number || 'N/A'}</strong></p>
+                    <div class="profile-badges">
+                        <span class="badge-white">${typeLbl}</span>
+                        <span class="badge-white">${s.status || 'ACTIVE'}</span>
+                        ${s.class_teacher_of ? `<span class="badge-white">Class Teacher: ${s.class_teacher_of}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="openEditStaffDrawer()">✏️ Edit Profile</button>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Employment Details -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">💼 Employment & Role</span>
+                    <span class="role-tag ${s.role || 'SUBJECT_TEACHER'}">${(s.role || '').replace(/_/g, ' ')}</span>
+                </div>
+                <div class="info-row"><span class="ir-label">Staff ID / Number</span><span class="ir-value" style="font-family:monospace;font-weight:700;">${s.staff_number || 'N/A'}</span></div>
+                <div class="info-row"><span class="ir-label">Employment Type</span><span class="ir-value">${typeLbl}</span></div>
+                <div class="info-row"><span class="ir-label">Department</span><span class="ir-value">${s.department || 'N/A'}</span></div>
+                <div class="info-row"><span class="ir-label">Employment Status</span><span class="ir-value"><span class="badge ${statusCls}">${s.status || 'ACTIVE'}</span></span></div>
+                <div class="info-row"><span class="ir-label">Date of Joining</span><span class="ir-value">${s.hire_date || 'N/A'}</span></div>
+                <div class="info-row"><span class="ir-label">Qualification</span><span class="ir-value">${s.qualification || 'Degree / Diploma'}</span></div>
+            </div>
+
+            <!-- Personal Details -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">👤 Personal Details</span></div>
+                <div class="info-row"><span class="ir-label">Full Name</span><span class="ir-value">${fullName}</span></div>
+                <div class="info-row"><span class="ir-label">Phone Number</span><span class="ir-value"><a href="tel:${s.phone_number || s.phone || ''}" style="color:var(--green-dark);">${s.phone_number || s.phone || 'N/A'}</a></span></div>
+                <div class="info-row"><span class="ir-label">Email Address</span><span class="ir-value"><a href="mailto:${s.email || ''}" style="color:var(--green-dark);">${s.email || 'N/A'}</a></span></div>
+                <div class="info-row"><span class="ir-label">National ID / Passport</span><span class="ir-value">${s.national_id || 'N/A'}</span></div>
+                <div class="info-row"><span class="ir-label">Gender</span><span class="ir-value">${s.gender || 'N/A'}</span></div>
+            </div>
+        </div>
+
+        <!-- Teaching / Work Assignments (Only shown for teachers or applicable staff) -->
+        <div class="card" style="margin-top:20px;">
+            <div class="card-header">
+                <span class="card-title">📚 Teaching Assignments & Responsibilities</span>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <h4 style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">Assigned Subjects</h4>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        ${subjects.length ? subjects.map(sub => `<span class="tag green">📖 ${sub.trim()}</span>`).join('') : '<span style="font-size:13px; color:var(--text-muted);">No subjects assigned</span>'}
+                    </div>
+                </div>
+                <div>
+                    <h4 style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">Assigned Classes</h4>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        ${classes.length ? classes.map(c => `<span class="tag blue">🏫 ${c.trim()}</span>`).join('') : '<span style="font-size:13px; color:var(--text-muted);">No classes assigned</span>'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function openEditStaffDrawer() {
+    if (!currentStaff) return;
+    document.getElementById('edit-fname').value = currentStaff.first_name || '';
+    document.getElementById('edit-lname').value = currentStaff.last_name || '';
+    document.getElementById('edit-staffno').value = currentStaff.staff_number || '';
+    document.getElementById('edit-status').value = currentStaff.status || 'ACTIVE';
+    document.getElementById('edit-dept').value = currentStaff.department || '';
+    document.getElementById('edit-role').value = currentStaff.role || 'SUBJECT_TEACHER';
+    document.getElementById('edit-phone').value = currentStaff.phone_number || currentStaff.phone || '';
+    document.getElementById('edit-email').value = currentStaff.email || '';
+    document.getElementById('edit-natid').value = currentStaff.national_id || '';
+    document.getElementById('edit-gender').value = currentStaff.gender || 'MALE';
+
+    const subs = Array.isArray(currentStaff.subjects) ? currentStaff.subjects.join(', ') : (currentStaff.subjects || '');
+    const cls = Array.isArray(currentStaff.classes) ? currentStaff.classes.join(', ') : (currentStaff.classes || '');
+    document.getElementById('edit-subjects').value = subs;
+    document.getElementById('edit-classes').value = cls;
+
+    KHS.openDrawer('edit-staff-drawer', 'edit-drawer-overlay');
+}
+
+function saveStaffChanges(e) {
+    e.preventDefault();
+    if (!currentStaff) return;
+
+    currentStaff.first_name = document.getElementById('edit-fname').value.trim();
+    currentStaff.last_name = document.getElementById('edit-lname').value.trim();
+    currentStaff.status = document.getElementById('edit-status').value;
+    currentStaff.department = document.getElementById('edit-dept').value.trim();
+    currentStaff.role = document.getElementById('edit-role').value;
+    currentStaff.phone_number = document.getElementById('edit-phone').value.trim();
+    currentStaff.email = document.getElementById('edit-email').value.trim();
+    currentStaff.national_id = document.getElementById('edit-natid').value.trim();
+    currentStaff.gender = document.getElementById('edit-gender').value;
+
+    const subjectsVal = document.getElementById('edit-subjects').value.trim();
+    currentStaff.subjects = subjectsVal ? subjectsVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    const classesVal = document.getElementById('edit-classes').value.trim();
+    currentStaff.classes = classesVal ? classesVal.split(',').map(c => c.trim()).filter(Boolean) : [];
+
+    renderProfile(currentStaff);
+    KHS.closeDrawer('edit-staff-drawer', 'edit-drawer-overlay');
+    showToast('✅ Staff profile updated successfully!');
+}
+
+loadProfile();
+</script>
+</body>
+</html>

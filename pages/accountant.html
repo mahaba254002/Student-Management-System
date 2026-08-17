@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accountant Dashboard – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text"><span>Kwale High</span><span>Finance Office</span></div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></a>
+
+        <span class="nav-section-title">Finance</span>
+        <a href="#" class="nav-item" onclick="switchView('fees', this)"><span class="nav-icon">💳</span><span class="nav-label">Fees Collection</span></a>
+        <a href="#" class="nav-item" onclick="switchView('payments', this)"><span class="nav-icon">💸</span><span class="nav-label">Payments</span></a>
+        <a href="#" class="nav-item" onclick="switchView('expenses', this)"><span class="nav-icon">📊</span><span class="nav-label">Expenses</span></a>
+        <a href="#" class="nav-item" onclick="switchView('receipts', this)"><span class="nav-icon">🧾</span><span class="nav-label">Receipts</span></a>
+        <a href="#" class="nav-item" onclick="switchView('reports', this)"><span class="nav-icon">📈</span><span class="nav-label">Finance Reports</span></a>
+
+        <span class="nav-section-title">Students</span>
+        <a href="#" class="nav-item" onclick="switchView('balances', this)"><span class="nav-icon">🎓</span><span class="nav-label">Fee Balances</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><span class="btn-icon">🚪</span><span class="btn-label">Logout</span></button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">Finance Dashboard</span>
+        <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search fees, receipts…"></div>
+        <div class="topbar-actions">
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AS</div>
+                <div class="user-info-sm"><span class="u-name" id="user-name">Ms. Amina Suleiman</span><span class="u-role" id="user-role">Accountant</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <div class="page-header">
+                <h2>Finance Overview 💰</h2>
+                <p>Fees collection, payments, expenses and financial reports.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchView('fees')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Fees Collected</div><div class="stat-value">KSh 4.2M</div><div class="stat-sub">This term</div></div><div class="stat-icon green">💳</div></div>
+                <div class="stat-card" onclick="switchView('balances')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Outstanding Fees</div><div class="stat-value">KSh 1.8M</div><div class="stat-sub">318 students</div></div><div class="stat-icon amber">⚠️</div></div>
+                <div class="stat-card" onclick="switchView('expenses')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Total Expenses</div><div class="stat-value">KSh 2.1M</div><div class="stat-sub">This term</div></div><div class="stat-icon gray">📊</div></div>
+                <div class="stat-card" onclick="switchView('reports')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Net Balance</div><div class="stat-value">KSh 2.1M</div><div class="stat-sub">Surplus</div></div><div class="stat-icon blue">📈</div></div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Finance Actions</span><span class="card-badge">Accountant</span></div>
+                    <div class="nav-cards">
+                        <a href="#" class="nav-card" onclick="switchView('fees')"><span class="nc-icon">💳</span><span class="nc-label">Collect Fees</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('payments')"><span class="nc-icon">💸</span><span class="nc-label">Payments</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('expenses')"><span class="nc-icon">📊</span><span class="nc-label">Expenses</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('receipts')"><span class="nc-icon">🧾</span><span class="nc-label">Receipts</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('reports')"><span class="nc-icon">📈</span><span class="nc-label">Reports</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('balances')"><span class="nc-icon">🎓</span><span class="nc-label">Balances</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Monthly Collections</span><span class="card-badge">This Term</span></div>
+                    <div class="chart-placeholder"><span class="chart-icon">💰</span><span>Monthly fees collection chart</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. FEES COLLECTION -->
+        <div class="portal-view" id="view-fees"><div class="page-header"><h2>Fees Collection 💳</h2></div><div class="card"><p style="color:var(--text-muted)">Record fee payments from M-Pesa / Bank deposit.</p></div></div>
+        <!-- 3. PAYMENTS -->
+        <div class="portal-view" id="view-payments"><div class="page-header"><h2>Payments & Disbursements 💸</h2></div><div class="card"><p style="color:var(--text-muted)">Vendor & supplier payment ledger.</p></div></div>
+        <!-- 4. EXPENSES -->
+        <div class="portal-view" id="view-expenses"><div class="page-header"><h2>School Expenditures 📊</h2></div><div class="card"><p style="color:var(--text-muted)">Utility, maintenance, and departmental expense logging.</p></div></div>
+        <!-- 5. RECEIPTS -->
+        <div class="portal-view" id="view-receipts"><div class="page-header"><h2>Issued Receipts 🧾</h2></div><div class="card"><p style="color:var(--text-muted)">Search & re-print fee payment receipts.</p></div></div>
+        <!-- 6. FINANCE REPORTS -->
+        <div class="portal-view" id="view-reports"><div class="page-header"><h2>Financial Reports 📈</h2></div><div class="card"><p style="color:var(--text-muted)">Balance sheet, trial balance, and audit reports.</p></div></div>
+        <!-- 7. FEE BALANCES -->
+        <div class="portal-view" id="view-balances"><div class="page-header"><h2>Student Fee Balances 🎓</h2></div><div class="card"><p style="color:var(--text-muted)">318 students with pending term fee balances.</p></div></div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+    const user = requireAuth();
+    if (user && user.role !== 'accountant') window.location.href = user.role + '.html';
+    if (user) { populateTopBar(user); }
+
+    function switchView(viewId, navEl) {
+        document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        if (navEl) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+        }
+        document.getElementById('topbar-page-title').textContent = viewId.replace('-', ' ').toUpperCase();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+</script>
+</body>
+</html>

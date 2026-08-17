@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classes – Kwale High School SMS</title>
+    <meta name="description" content="View and manage school classes.">
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .class-card {
+            background: var(--white);
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: transform .2s, box-shadow .2s;
+        }
+        .class-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .cc-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .cc-name { font-size: 16px; font-weight: 700; color: var(--dark); }
+        .cc-level { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing:.05em; background:var(--gray-light); padding:3px 8px; border-radius:20px; }
+        
+        .cc-teacher {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px; background: #f8fafc; border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-border); margin-bottom: 14px;
+        }
+        .cct-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: var(--text-muted);
+        }
+        .cct-info { display: flex; flex-direction: column; }
+        .cct-name { font-size: 13px; font-weight: 600; color: var(--dark); }
+        .cct-role { font-size: 11px; color: var(--text-muted); }
+
+        .cc-stats {
+            display: flex; gap: 12px; margin-bottom: 14px;
+        }
+        .ccs-item { flex: 1; text-align: center; background: var(--gray-light); padding: 8px; border-radius: 6px; }
+        .ccs-val { font-size: 16px; font-weight: 700; color: var(--dark); }
+        .ccs-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+
+        .cc-actions { display: flex; gap: 8px; }
+        .cc-actions .btn { flex: 1; justify-content: center; padding: 7px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Classes</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+            <div>
+                <h2>Classes</h2>
+                <p>Manage school classes and class teachers</p>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Add Class</button>
+        </div>
+
+        <div class="class-grid" id="class-grid">
+            <div class="empty-state"><div class="es-icon">🏫</div><div class="es-text">Loading classes…</div></div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin', 'principal', 'deputy_principal', 'hod', 'teacher']);
+if (user) populateTopBar(user);
+
+async function loadClasses() {
+    const classes = await apiFetch('/api/classes');
+    if (!classes) {
+        document.getElementById('class-grid').innerHTML = 
+            '<div class="empty-state"><div class="es-icon">❌</div><div class="es-text">Failed to load classes</div></div>';
+        return;
+    }
+
+    if (!classes.length) {
+        document.getElementById('class-grid').innerHTML = 
+            '<div class="empty-state"><div class="es-icon">🏫</div><div class="es-text">No classes found</div></div>';
+        return;
+    }
+
+    // Sort by level then stream
+    classes.sort((a,b) => {
+        if(a.level !== b.level) return String(a.level).localeCompare(String(b.level));
+        return String(a.stream).localeCompare(String(b.stream));
+    });
+
+    const grid = document.getElementById('class-grid');
+    
+    // Process teachers
+    // Fetch all staff to match class teachers if necessary, though API could return it.
+    // Assuming API just returns basic class info without students count for now, we'll fetch students too.
+    const students = await apiFetch('/api/students?limit=1000') || [];
+    
+    // Calculate counts
+    const classCounts = {};
+    students.forEach(s => {
+        if (s.class_id) {
+            classCounts[s.class_id] = (classCounts[s.class_id] || 0) + 1;
+        }
+    });
+
+    grid.innerHTML = classes.map(c => {
+        const count = classCounts[c.id] || 0;
+        const capacity = c.capacity || 45;
+        // In this implementation, class teacher is not returned by default /api/classes endpoint yet.
+        // We will just show a placeholder if not present.
+        const teacherName = 'Not Assigned'; 
+        const initials = 'NA';
+        
+        return `
+            <div class="class-card">
+                <div class="cc-header">
+                    <div class="cc-name">${c.name}</div>
+                    <div class="cc-level">Form ${c.level}</div>
+                </div>
+                
+                <div class="cc-teacher">
+                    <div class="cct-avatar">${initials}</div>
+                    <div class="cct-info">
+                        <span class="cct-name">${teacherName}</span>
+                        <span class="cct-role">Class Teacher</span>
+                    </div>
+                </div>
+
+                <div class="cc-stats">
+                    <div class="ccs-item">
+                        <div class="ccs-val" style="color:${count >= capacity ? 'var(--danger)' : 'var(--green-dark)'}">${count}</div>
+                        <div class="ccs-lbl">Students</div>
+                    </div>
+                    <div class="ccs-item">
+                        <div class="ccs-val">${capacity}</div>
+                        <div class="ccs-lbl">Capacity</div>
+                    </div>
+                </div>
+                
+                <div class="cc-actions">
+                    <a href="admin-students.html?class_id=${c.id}" class="btn btn-outline">View Students</a>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+loadClasses();
+</script>
+</body>
+</html>

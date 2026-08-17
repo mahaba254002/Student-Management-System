@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deputy Dashboard – Kwale High School SMS</title>
+    <link rel="stylesheet" href="../dashboard.css">
+    <style>
+        .portal-view { display: none; }
+        .portal-view.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-badge">KHS</div>
+        <div class="logo-text"><span>Kwale High</span><span>Deputy Principal</span></div>
+        <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-section-title">Main</span>
+        <a href="#" class="nav-item active" onclick="switchView('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></a>
+
+        <span class="nav-section-title">Academic</span>
+        <a href="#" class="nav-item" onclick="switchView('classes', this)"><span class="nav-icon">🏫</span><span class="nav-label">Classes</span></a>
+        <a href="#" class="nav-item" onclick="switchView('subjects', this)"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+        <a href="#" class="nav-item" onclick="switchView('exams', this)"><span class="nav-icon">📝</span><span class="nav-label">Exams</span></a>
+
+        <span class="nav-section-title">People</span>
+        <a href="#" class="nav-item" onclick="switchView('teachers', this)"><span class="nav-icon">👨‍🏫</span><span class="nav-label">Teachers</span></a>
+        <a href="#" class="nav-item" onclick="switchView('staff', this)"><span class="nav-icon">👷</span><span class="nav-label">Staff</span></a>
+        <a href="#" class="nav-item" onclick="switchView('students', this)"><span class="nav-icon">🎓</span><span class="nav-label">Students</span></a>
+        <a href="#" class="nav-item" onclick="switchView('attendance', this)"><span class="nav-icon">📋</span><span class="nav-label">Attendance</span></a>
+
+        <span class="nav-section-title">Finance</span>
+        <a href="#" class="nav-item" onclick="switchView('fees', this)"><span class="nav-icon">💳</span><span class="nav-label">Fees Collection</span></a>
+        <a href="#" class="nav-item" onclick="switchView('expenses', this)"><span class="nav-icon">📊</span><span class="nav-label">Expenses</span></a>
+
+        <span class="nav-section-title">Reports & System</span>
+        <a href="#" class="nav-item" onclick="switchView('reports', this)"><span class="nav-icon">📋</span><span class="nav-label">Reports</span></a>
+        <a href="#" class="nav-item" onclick="switchView('settings', this)"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()"><span class="btn-icon">🚪</span><span class="btn-label">Logout</span></button>
+    </div>
+</aside>
+
+<div class="main-wrapper" id="main-wrapper">
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title" id="topbar-page-title">Dashboard</span>
+        <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search…"></div>
+        <div class="topbar-actions">
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+            <div class="user-pill" onclick="switchView('settings')">
+                <div class="user-avatar-sm" id="user-avatar">HK</div>
+                <div class="user-info-sm"><span class="u-name" id="user-name">Deputy</span><span class="u-role" id="user-role">Deputy</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="page-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <div class="portal-view active" id="view-dashboard">
+            <div class="page-header">
+                <h2>Welcome back, <span id="greeting-name">Mr. Hassan Kirui</span> 👋</h2>
+                <p>Full school overview – Academic, People & Finance</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchView('students')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Enrolled Students</div><div class="stat-value">1,245</div><div class="stat-sub">↑ 12 this term</div></div><div class="stat-icon green">🎓</div></div>
+                <div class="stat-card" onclick="switchView('teachers')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Active Teachers</div><div class="stat-value">86</div><div class="stat-sub">3 on leave</div></div><div class="stat-icon blue">👨‍🏫</div></div>
+                <div class="stat-card" onclick="switchView('staff')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Support Staff</div><div class="stat-value">34</div><div class="stat-sub">All departments</div></div><div class="stat-icon gray">👷</div></div>
+                <div class="stat-card" onclick="switchView('fees')" style="cursor:pointer"><div class="stat-info"><div class="stat-label">Fees Collected</div><div class="stat-value">KSh 4.2M</div><div class="stat-sub">This term</div></div><div class="stat-icon amber">💳</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Quick Access</span><span class="card-badge">Deputy</span></div>
+                    <div class="nav-cards">
+                        <a href="#" class="nav-card" onclick="switchView('classes')"><span class="nc-icon">🏫</span><span class="nc-label">Classes</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('exams')"><span class="nc-icon">📝</span><span class="nc-label">Exams</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('students')"><span class="nc-icon">🎓</span><span class="nc-label">Students</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('teachers')"><span class="nc-icon">👨‍🏫</span><span class="nc-label">Teachers</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('fees')"><span class="nc-icon">💳</span><span class="nc-label">Fees</span></a>
+                        <a href="#" class="nav-card" onclick="switchView('reports')"><span class="nc-icon">📊</span><span class="nc-label">Reports</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">School Performance</span><span class="card-badge">This Term</span></div>
+                    <div class="chart-placeholder"><span class="chart-icon">📈</span><span>School performance overview</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CLASSES -->
+        <div class="portal-view" id="view-classes"><div class="page-header"><h2>Classes 🏫</h2></div><div class="card"><p style="color:var(--text-muted)">Class rosters and streams.</p></div></div>
+        <!-- 3. SUBJECTS -->
+        <div class="portal-view" id="view-subjects"><div class="page-header"><h2>Subjects 📚</h2></div><div class="card"><p style="color:var(--text-muted)">Subject distribution.</p></div></div>
+        <!-- 4. EXAMS -->
+        <div class="portal-view" id="view-exams"><div class="page-header"><h2>Exams 📝</h2></div><div class="card"><p style="color:var(--text-muted)">Examination schedules.</p></div></div>
+        <!-- 5. TEACHERS -->
+        <div class="portal-view" id="view-teachers"><div class="page-header"><h2>Teachers 👨‍🏫</h2></div><div class="card"><p style="color:var(--text-muted)">Teacher roster.</p></div></div>
+        <!-- 6. STAFF -->
+        <div class="portal-view" id="view-staff"><div class="page-header"><h2>Support Staff 👷</h2></div><div class="card"><p style="color:var(--text-muted)">Non-teaching staff.</p></div></div>
+        <!-- 7. STUDENTS -->
+        <div class="portal-view" id="view-students"><div class="page-header"><h2>Students 🎓</h2></div><div class="card"><p style="color:var(--text-muted)">Student directory.</p></div></div>
+        <!-- 8. ATTENDANCE -->
+        <div class="portal-view" id="view-attendance"><div class="page-header"><h2>Attendance 📋</h2></div><div class="card"><p style="color:var(--text-muted)">Daily attendance log.</p></div></div>
+        <!-- 9. FEES -->
+        <div class="portal-view" id="view-fees"><div class="page-header"><h2>Fees Collection 💳</h2></div><div class="card"><p style="color:var(--text-muted)">Fees collection status.</p></div></div>
+        <!-- 10. EXPENSES -->
+        <div class="portal-view" id="view-expenses"><div class="page-header"><h2>Expenses 📊</h2></div><div class="card"><p style="color:var(--text-muted)">School expenditure.</p></div></div>
+        <!-- 11. REPORTS -->
+        <div class="portal-view" id="view-reports"><div class="page-header"><h2>Reports 📋</h2></div><div class="card"><p style="color:var(--text-muted)">Comprehensive reports.</p></div></div>
+        <!-- 12. SETTINGS -->
+        <div class="portal-view" id="view-settings"><div class="page-header"><h2>Settings ⚙️</h2></div><div class="card"><p style="color:var(--text-muted)">Deputy settings.</p></div></div>
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+    const user = requireAuth();
+    if (user && user.role !== 'deputy') window.location.href = user.role + '.html';
+    if (user) { populateTopBar(user); document.getElementById('greeting-name').textContent = user.name; }
+
+    function switchView(viewId, navEl) {
+        document.querySelectorAll('.portal-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        if (navEl) {
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+            navEl.classList.add('active');
+        }
+        document.getElementById('topbar-page-title').textContent = viewId.replace('-', ' ').toUpperCase();
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+        window.scrollTo(0, 0);
+    }
+</script>
+</body>
+</html>

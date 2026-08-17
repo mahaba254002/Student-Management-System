@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings – Kwale High School</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+
+<div id="khs-toast"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-wrapper" id="main-wrapper">
+
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle">☰</button>
+        <span class="topbar-title">Settings</span>
+        <div class="topbar-actions">
+            <div class="user-pill">
+                <div class="user-avatar-sm" id="user-avatar">AD</div>
+                <div class="user-info-sm">
+                    <span class="u-name" id="user-name">Admin</span>
+                    <span class="u-role" id="user-role">Administrator</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header" style="margin-bottom:24px;">
+            <h2>System Configuration</h2>
+            <p>Manage academic years, terms, and global preferences</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><span class="card-title">School Details</span></div>
+                <form>
+                    <div class="form-group">
+                        <label class="form-label">School Name</label>
+                        <input type="text" class="form-input" value="Kwale High School" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">School Type</label>
+                        <input type="text" class="form-input" value="Boys Boarding" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" class="form-input" value="info@kwalehigh.ac.ke">
+                    </div>
+                    <button class="btn btn-primary" type="button" onclick="alert('Settings saved')">Save Changes</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">Active Academic Year</span></div>
+                <div class="info-row">
+                    <span class="ir-label">Current Year</span>
+                    <span class="ir-value" style="font-weight:700;">2025</span>
+                </div>
+                <div class="info-row">
+                    <span class="ir-label">Current Term</span>
+                    <span class="ir-value" style="font-weight:700;">Term 1</span>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <label class="form-label">Switch Academic Term</label>
+                    <select class="form-select" style="margin-bottom:10px;">
+                        <option>2025 - Term 1</option>
+                        <option>2025 - Term 2</option>
+                        <option>2025 - Term 3</option>
+                    </select>
+                    <button class="btn btn-outline" type="button" onclick="alert('Session updated')">Update Session</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../auth.js"></script>
+<script src="../dashboard.js"></script>
+<script>
+const user = requireAuth(['admin']);
+if (user) populateTopBar(user);
+</script>
+</body>
+</html>
