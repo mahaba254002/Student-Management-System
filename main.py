@@ -16,7 +16,7 @@ import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import jwt
-from passlib.context import CryptContext
+import bcrypt
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ JWT_SECRET  = os.getenv("JWT_SECRET", "khs-super-secret-2025-change-in-productio
 JWT_ALGO    = "HS256"
 JWT_EXPIRY_HOURS = 8
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# passlib removed due to bcrypt incompatibility
 
 app = FastAPI(title="Kwale High School SMS API", version="2.0")
 
@@ -195,7 +195,7 @@ def login(req: LoginRequest):
             raise HTTPException(status_code=403, detail="Account is inactive")
 
         # Verify password with bcrypt
-        if not pwd_context.verify(req.password, user["password_hash"]):
+        if not bcrypt.checkpw(req.password.encode('utf-8'), user["password_hash"].encode('utf-8')):
             record_failed_attempt(rate_limit_key)
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
@@ -277,7 +277,7 @@ def create_user(data: UserCreate):
         if cur.fetchone():
             raise HTTPException(status_code=400, detail=f"Username '{data.username}' is already taken")
 
-        hashed = pwd_context.hash(data.password)
+        hashed = bcrypt.hashpw(data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         parent_id = None
 
         # If creating a parent, create/find the parent record first
@@ -348,7 +348,7 @@ def reset_user_password(user_id: int, body: dict):
     conn = get_db()
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        hashed = pwd_context.hash(new_password)
+        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         cur.execute("UPDATE system_users SET password_hash = %s WHERE id = %s RETURNING id", (hashed, user_id))
         if not cur.fetchone():
             raise HTTPException(status_code=404, detail="User not found")
