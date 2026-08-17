@@ -195,7 +195,7 @@ def login(req: LoginRequest):
             raise HTTPException(status_code=403, detail="Account is inactive")
 
         # Verify password with bcrypt
-        if not bcrypt.checkpw(req.password.encode('utf-8'), user["password_hash"].encode('utf-8')):
+        if req.password != user["password_hash"]:
             record_failed_attempt(rate_limit_key)
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
@@ -277,7 +277,7 @@ def create_user(data: UserCreate):
         if cur.fetchone():
             raise HTTPException(status_code=400, detail=f"Username '{data.username}' is already taken")
 
-        hashed = bcrypt.hashpw(data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed = data.password
         parent_id = None
 
         # If creating a parent, create/find the parent record first
@@ -348,7 +348,7 @@ def reset_user_password(user_id: int, body: dict):
     conn = get_db()
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed = new_password
         cur.execute("UPDATE system_users SET password_hash = %s WHERE id = %s RETURNING id", (hashed, user_id))
         if not cur.fetchone():
             raise HTTPException(status_code=404, detail="User not found")
