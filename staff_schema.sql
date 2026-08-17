@@ -628,9 +628,10 @@ ON CONFLICT DO NOTHING;
 
 
 -- Boarding Assignments
-INSERT INTO student_boarding_assignments (student_id, dormitory_id, academic_year_id, bed_number, status)
+INSERT INTO student_boarding_assignments (student_id, dormitory_id, academic_year_id, bed_number, start_date, status)
 SELECT st.id, d.id, ay.id,
        'B' || LPAD(ROW_NUMBER() OVER (ORDER BY st.id)::text, 3, '0'),
+       CURRENT_DATE,
        'ACTIVE'
 FROM students st
 CROSS JOIN dormitories d

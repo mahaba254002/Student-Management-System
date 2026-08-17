@@ -107,8 +107,8 @@ BEGIN
 
         -- Assign 70% of students to dorms (boarders)
         IF counter % 10 < 7 THEN
-            INSERT INTO student_boarding_assignments (student_id, dormitory_id, academic_year_id, bed_number, status)
-            VALUES (v_student_id, v_dorm, v_ay_id, counter::TEXT, 'ACTIVE')
+            INSERT INTO student_boarding_assignments (student_id, dormitory_id, academic_year_id, bed_number, start_date, status)
+            VALUES (v_student_id, v_dorm, v_ay_id, counter::TEXT, CURRENT_DATE, 'ACTIVE')
             ON CONFLICT DO NOTHING;
         END IF;
 
