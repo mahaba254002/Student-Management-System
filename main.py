@@ -119,7 +119,7 @@ def init_db_endpoint():
         conn = get_db()
         cur = conn.cursor()
         
-        sql_files = ["schema_generated.sql", "staff_schema.sql", "seed_extra.sql"]
+        sql_files = ["schema_generated.sql", "staff_schema.sql"]
         results = []
         
         for file in sql_files:

@@ -13,7 +13,7 @@ def init_db():
         conn = psycopg2.connect(database_url)
         cur = conn.cursor()
         
-        sql_files = ["schema_generated.sql", "seed_extra.sql"]
+        sql_files = ["schema_generated.sql", "staff_schema.sql"]
         
         for file in sql_files:
             if os.path.exists(file):
