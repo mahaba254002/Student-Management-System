@@ -133,11 +133,11 @@ BEGIN
     IF v_staff_ids IS NOT NULL AND v_class_ids IS NOT NULL THEN
         FOR i IN 1..LEAST(array_length(v_staff_ids,1), array_length(v_class_ids,1)) LOOP
             INSERT INTO staff_class_assignments (staff_id, class_id, academic_year_id, assignment_role)
-            VALUES (v_staff_ids[i], v_class_ids[i], v_ay_id, 'CLASS_TEACHER')
+            VALUES (v_staff_ids[i], v_class_ids[i], v_ay_id, 'CLASS_TEACHER');
         END LOOP;
     END IF;
 END;
-$;
+$$;
 
 -- ── 7. Add fee structure entries for fees pages ──────────────
 CREATE TABLE IF NOT EXISTS fee_structure (
