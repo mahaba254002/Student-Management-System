@@ -570,7 +570,7 @@ CROSS JOIN (SELECT id FROM schools WHERE emis_code = 'KWL001') sc
 WHERE st.admission_number IN (
     'KHS/0001/2024','KHS/0002/2024','KHS/0003/2024','KHS/0004/2024','KHS/0005/2024',
     'KHS/0006/2024','KHS/0007/2024','KHS/0008/2024','KHS/0009/2024','KHS/0010/2024'
-)
+);
 
 
 -- Student Enrollments 2025 — Form 4
@@ -639,7 +639,7 @@ WHERE ay.year = 2025 AND d.name = 'Mombasa House'
   AND st.admission_number IN (
     'KHS/0001/2024','KHS/0002/2024','KHS/0003/2024',
     'KHS/0026/2023','KHS/0027/2023','KHS/0029/2022'
-  )
+  );
 
 
 -- Notices
