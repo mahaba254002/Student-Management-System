@@ -333,7 +333,7 @@ INSERT INTO staff (
 ) ON CONFLICT (staff_number) DO NOTHING;
 
 
-INSERT INTO system_users (username, password_hash, role, staff_id)
-SELECT 'admin', 'admin123', 'admin', s.id
+INSERT INTO system_users (username, password_hash, role, staff_id, is_active)
+SELECT 'admin', 'admin123', 'admin', s.id, TRUE
 FROM staff s WHERE s.staff_number = 'KHS/ADM003'
 ON CONFLICT (username) DO NOTHING;
