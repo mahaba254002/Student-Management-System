@@ -1,37 +1,29 @@
 -- GENERATED SCHEMA FROM LOCAL DATABASE
 
-DROP TABLE IF EXISTS 
-    academic_years, classes, dormitories, subjects, schools, users, parents, staff, students, exams, 
-    exam_results, fee_structure, fee_payments, attendance, emergency_contacts, hod_assignments, notices, 
-    staff_class_assignments, staff_subjects, student_admission_requests, student_admissions, 
-    student_boarding_assignments, student_documents, student_enrollments, student_parents, system_users
-CASCADE;
-
-
 CREATE TABLE IF NOT EXISTS academic_years (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     year integer NOT NULL UNIQUE,
     start_date date NOT NULL,
     end_date date NOT NULL,
-    is_current boolean NOT NULL,
+    is_current boolean NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS classes (
     id BIGSERIAL NOT NULL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     level VARCHAR(255) NOT NULL,
     stream VARCHAR(255),
     capacity integer,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (level, stream)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS dormitories (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     capacity integer NOT NULL,
-    gender VARCHAR(255),
+    gender VARCHAR(255) DEFAULT 'MALE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -40,7 +32,7 @@ CREATE TABLE IF NOT EXISTS subjects (
     name VARCHAR(255) NOT NULL,
     code VARCHAR(255) UNIQUE,
     category VARCHAR(255),
-    is_compulsory boolean NOT NULL,
+    is_compulsory boolean NOT NULL DEFAULT FALSE,
     description text,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -60,7 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE,
     username VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    is_active boolean NOT NULL,
+    is_active boolean NOT NULL DEFAULT TRUE,
     last_login TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -91,21 +83,21 @@ CREATE TABLE IF NOT EXISTS staff (
     middle_name VARCHAR(255),
     last_name VARCHAR(255) NOT NULL,
     date_of_birth date,
-    gender VARCHAR(255) NOT NULL,
+    gender VARCHAR(255) NOT NULL DEFAULT 'MALE',
     national_id VARCHAR(255) UNIQUE,
     phone VARCHAR(255) NOT NULL,
     alternative_phone VARCHAR(255),
     email VARCHAR(255),
     photo_url VARCHAR(255),
-    employment_type VARCHAR(255) NOT NULL,
-    role VARCHAR(255) NOT NULL,
+    employment_type VARCHAR(255) NOT NULL DEFAULT 'TEACHING',
+    role VARCHAR(255) NOT NULL DEFAULT 'TEACHER',
     department VARCHAR(255),
     qualification VARCHAR(255),
     tsc_number VARCHAR(255),
     employment_date date,
-    contract_type VARCHAR(255) NOT NULL,
+    contract_type VARCHAR(255) NOT NULL DEFAULT 'PERMANENT',
     salary_grade VARCHAR(255),
-    status VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL DEFAULT 'ACTIVE',
     address text,
     county VARCHAR(255),
     sub_county VARCHAR(255),
@@ -124,11 +116,11 @@ CREATE TABLE IF NOT EXISTS students (
     middle_name VARCHAR(255),
     last_name VARCHAR(255) NOT NULL,
     date_of_birth date NOT NULL,
-    gender VARCHAR(255) NOT NULL,
+    gender VARCHAR(255) NOT NULL DEFAULT 'MALE',
     birth_certificate_number VARCHAR(255) UNIQUE,
     nationality VARCHAR(255) NOT NULL DEFAULT 'Kenyan',
     photo_url VARCHAR(255),
-    status VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -141,7 +133,7 @@ CREATE TABLE IF NOT EXISTS exams (
     exam_type text,
     start_date date,
     end_date date,
-    status text,
+    status text DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -152,11 +144,11 @@ CREATE TABLE IF NOT EXISTS exam_results (
     subject_id integer REFERENCES subjects(id),
     class_id integer REFERENCES classes(id),
     score numeric,
-    grade VARCHAR(255),
+    grade text,
     remarks text,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (exam_id, student_id, subject_id)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS fee_structure (
     id SERIAL NOT NULL PRIMARY KEY,
@@ -187,7 +179,7 @@ CREATE TABLE IF NOT EXISTS attendance (
     student_id integer UNIQUE,
     class_id integer REFERENCES classes(id),
     date date NOT NULL UNIQUE,
-    status text,
+    status text DEFAULT 'ACTIVE',
     recorded_by integer REFERENCES staff(id),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -219,7 +211,7 @@ CREATE TABLE IF NOT EXISTS notices (
     body text NOT NULL,
     posted_by bigint REFERENCES staff(id),
     target_audience VARCHAR(255) NOT NULL,
-    is_pinned boolean NOT NULL,
+    is_pinned boolean NOT NULL DEFAULT FALSE,
     expires_at date,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -230,7 +222,7 @@ CREATE TABLE IF NOT EXISTS staff_class_assignments (
     class_id bigint NOT NULL REFERENCES classes(id),
     subject_id bigint REFERENCES subjects(id),
     academic_year_id bigint NOT NULL REFERENCES academic_years(id),
-    assignment_role VARCHAR(255) NOT NULL,
+    assignment_role VARCHAR(255) NOT NULL DEFAULT 'TEACHER',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -238,10 +230,10 @@ CREATE TABLE IF NOT EXISTS staff_subjects (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     staff_id bigint NOT NULL REFERENCES staff(id),
     subject_id bigint NOT NULL REFERENCES subjects(id),
-    is_primary boolean NOT NULL,
+    is_primary boolean NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (staff_id, subject_id)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS student_admission_requests (
     id BIGSERIAL NOT NULL PRIMARY KEY,
@@ -250,10 +242,10 @@ CREATE TABLE IF NOT EXISTS student_admission_requests (
     middle_name VARCHAR(255),
     last_name VARCHAR(255) NOT NULL,
     date_of_birth date,
-    gender VARCHAR(255),
+    gender VARCHAR(255) DEFAULT 'MALE',
     requested_class_id bigint REFERENCES classes(id),
     reason text,
-    status VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL DEFAULT 'PENDING',
     reviewed_by bigint,
     reviewed_at TIMESTAMP,
     rejection_reason text,
@@ -270,7 +262,7 @@ CREATE TABLE IF NOT EXISTS student_admissions (
     entry_level VARCHAR(255),
     admission_type VARCHAR(255),
     admission_letter_number VARCHAR(255),
-    admission_status VARCHAR(255) NOT NULL,
+    admission_status VARCHAR(255) NOT NULL DEFAULT 'ADMITTED',
     approved_by bigint,
     approved_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -285,7 +277,7 @@ CREATE TABLE IF NOT EXISTS student_boarding_assignments (
     bed_number VARCHAR(255),
     start_date date NOT NULL,
     end_date date,
-    status VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -296,7 +288,7 @@ CREATE TABLE IF NOT EXISTS student_documents (
     document_number VARCHAR(255),
     file_url VARCHAR(255) NOT NULL,
     issue_date date,
-    is_verified boolean NOT NULL,
+    is_verified boolean NOT NULL DEFAULT FALSE,
     verified_by bigint,
     verified_at TIMESTAMP,
     uploaded_at TIMESTAMP NOT NULL,
@@ -309,7 +301,7 @@ CREATE TABLE IF NOT EXISTS student_enrollments (
     academic_year_id bigint NOT NULL REFERENCES academic_years(id),
     class_id bigint NOT NULL REFERENCES classes(id),
     enrollment_date date NOT NULL,
-    enrollment_status VARCHAR(255) NOT NULL,
+    enrollment_status VARCHAR(255) NOT NULL DEFAULT 'ENROLLED',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, academic_year_id)
@@ -320,11 +312,11 @@ CREATE TABLE IF NOT EXISTS student_parents (
     student_id bigint NOT NULL REFERENCES students(id),
     parent_id bigint NOT NULL REFERENCES parents(id),
     relationship VARCHAR(255) NOT NULL,
-    is_primary_contact boolean NOT NULL,
-    is_emergency_contact boolean NOT NULL,
+    is_primary_contact boolean NOT NULL DEFAULT FALSE,
+    is_emergency_contact boolean NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, parent_id)
-);
+    );
 
 CREATE TABLE IF NOT EXISTS system_users (
     id BIGSERIAL NOT NULL PRIMARY KEY,
@@ -334,9 +326,9 @@ CREATE TABLE IF NOT EXISTS system_users (
     staff_id bigint REFERENCES staff(id),
     student_id bigint REFERENCES students(id),
     parent_id bigint REFERENCES parents(id),
-    is_active boolean NOT NULL,
+    is_active boolean NOT NULL DEFAULT TRUE,
     last_login TIMESTAMP,
-    must_change_password boolean NOT NULL,
+    must_change_password boolean NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
