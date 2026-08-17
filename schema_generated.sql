@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_active boolean NOT NULL,
     last_login TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS parents (
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS parents (
     sub_county VARCHAR(255),
     postal_address VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS staff (
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS staff (
     emergency_contact_phone VARCHAR(255),
     notes text,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS students (
@@ -118,11 +118,11 @@ CREATE TABLE IF NOT EXISTS students (
     date_of_birth date NOT NULL,
     gender VARCHAR(255) NOT NULL,
     birth_certificate_number VARCHAR(255) UNIQUE,
-    nationality VARCHAR(255) NOT NULL,
+    nationality VARCHAR(255) NOT NULL DEFAULT 'Kenyan',
     photo_url VARCHAR(255),
     status VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS exams (
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS student_admission_requests (
     reviewed_at TIMESTAMP,
     rejection_reason text,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS student_admissions (
@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS student_admissions (
     approved_by bigint,
     approved_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS student_boarding_assignments (
@@ -303,7 +303,7 @@ CREATE TABLE IF NOT EXISTS student_enrollments (
     enrollment_date date NOT NULL,
     enrollment_status VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, academic_year_id)
 );
 
