@@ -19,4 +19,4 @@ services:
 databases:
   - name: kwale-high-db
     databaseName: kwale_high_school
-    user: postgres
+    user: kwale_admin
