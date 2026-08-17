@@ -550,13 +550,13 @@ INSERT INTO student_parents (student_id, parent_id, relationship, is_primary_con
 SELECT st.id, p.id, 'FATHER', TRUE
 FROM students st, parents p
 WHERE st.admission_number = 'KHS/0001/2024' AND p.national_id = 'NID002'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, parent_id) DO NOTHING;
 
 INSERT INTO student_parents (student_id, parent_id, relationship, is_primary_contact)
 SELECT st.id, p.id, 'FATHER', TRUE
 FROM students st, parents p
 WHERE st.admission_number = 'KHS/0009/2024' AND p.national_id = 'NID001'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, parent_id) DO NOTHING;
 
 
 -- Student Admissions
@@ -571,7 +571,6 @@ WHERE st.admission_number IN (
     'KHS/0001/2024','KHS/0002/2024','KHS/0003/2024','KHS/0004/2024','KHS/0005/2024',
     'KHS/0006/2024','KHS/0007/2024','KHS/0008/2024','KHS/0009/2024','KHS/0010/2024'
 )
-ON CONFLICT DO NOTHING;
 
 
 -- Student Enrollments 2025 — Form 4
@@ -582,7 +581,7 @@ CROSS JOIN academic_years ay
 CROSS JOIN classes c
 WHERE ay.year = 2025 AND c.name = 'Form 4 North'
   AND st.admission_number IN ('KHS/0029/2022','KHS/0030/2022')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, academic_year_id) DO NOTHING;
 
 -- Form 3
 INSERT INTO student_enrollments (student_id, academic_year_id, class_id, enrollment_status)
@@ -596,7 +595,7 @@ WHERE ay.year = 2025 AND c.name = 'Form 3 North'
     'KHS/0001/2024','KHS/0002/2024','KHS/0003/2024',
     'KHS/0004/2024','KHS/0005/2024'
   )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, academic_year_id) DO NOTHING;
 
 -- Form 2
 INSERT INTO student_enrollments (student_id, academic_year_id, class_id, enrollment_status)
@@ -610,7 +609,7 @@ WHERE ay.year = 2025 AND c.name = 'Form 2 East'
     'KHS/0009/2024','KHS/0010/2024',
     'KHS/0011/2024','KHS/0012/2024'
   )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, academic_year_id) DO NOTHING;
 
 -- Form 1
 INSERT INTO student_enrollments (student_id, academic_year_id, class_id, enrollment_status)
@@ -624,7 +623,7 @@ WHERE ay.year = 2025 AND c.name = 'Form 1 East'
     'KHS/0019/2025','KHS/0020/2025','KHS/0021/2025',
     'KHS/0022/2025','KHS/0023/2025','KHS/0024/2025','KHS/0025/2025'
   )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (student_id, academic_year_id) DO NOTHING;
 
 
 -- Boarding Assignments
@@ -641,7 +640,6 @@ WHERE ay.year = 2025 AND d.name = 'Mombasa House'
     'KHS/0001/2024','KHS/0002/2024','KHS/0003/2024',
     'KHS/0026/2023','KHS/0027/2023','KHS/0029/2022'
   )
-ON CONFLICT DO NOTHING;
 
 
 -- Notices

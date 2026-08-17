@@ -13,7 +13,7 @@ INSERT INTO dormitories (name, capacity, gender) VALUES
     ('Nguruwe Block', 80,  'MALE'),
     ('Tembo Block',   60,  'MALE'),
     ('Chui Block',    60,  'MALE')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (name) DO NOTHING;
 
 -- ── 3. Ensure 8 classes (Form 1-4 with two streams each) ────
 INSERT INTO classes (name, level, stream, capacity) VALUES
@@ -25,7 +25,7 @@ INSERT INTO classes (name, level, stream, capacity) VALUES
     ('Form 3 West',  '3', 'West',  45),
     ('Form 4 East',  '4', 'East',  45),
     ('Form 4 West',  '4', 'West',  45)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (level, stream) DO NOTHING;
 
 -- ── 4. Ensure current academic year exists ──────────────────
 INSERT INTO academic_years (year, start_date, end_date, is_current)
@@ -103,13 +103,12 @@ BEGIN
         -- Enroll student in a class
         INSERT INTO student_enrollments (student_id, class_id, academic_year_id, enrollment_date, enrollment_status)
         VALUES (v_student_id, v_class, v_ay_id, CURRENT_DATE, 'ENROLLED')
-        ON CONFLICT DO NOTHING;
+        ON CONFLICT (student_id, academic_year_id) DO NOTHING;
 
         -- Assign 70% of students to dorms (boarders)
         IF counter % 10 < 7 THEN
             INSERT INTO student_boarding_assignments (student_id, dormitory_id, academic_year_id, bed_number, start_date, status)
             VALUES (v_student_id, v_dorm, v_ay_id, counter::TEXT, CURRENT_DATE, 'ACTIVE')
-            ON CONFLICT DO NOTHING;
         END IF;
 
     END LOOP;
@@ -135,11 +134,10 @@ BEGIN
         FOR i IN 1..LEAST(array_length(v_staff_ids,1), array_length(v_class_ids,1)) LOOP
             INSERT INTO staff_class_assignments (staff_id, class_id, academic_year_id, assignment_role)
             VALUES (v_staff_ids[i], v_class_ids[i], v_ay_id, 'CLASS_TEACHER')
-            ON CONFLICT DO NOTHING;
         END LOOP;
     END IF;
 END;
-$$;
+$;
 
 -- ── 7. Add fee structure entries for fees pages ──────────────
 CREATE TABLE IF NOT EXISTS fee_structure (
@@ -192,8 +190,7 @@ FROM academic_years ay,
     (4, 'EXAM',         5000),
     (4, 'DEVELOPMENT',  3000)
 ) AS t(cl, ft, amt)
-WHERE ay.is_current = TRUE
-ON CONFLICT DO NOTHING;
+WHERE ay.is_current = TRUE;
 
 -- Sample fee payments (60% of students paid)
 INSERT INTO fee_payments (student_id, academic_year_id, amount, fee_type, term, payment_method, reference_no)
@@ -212,8 +209,7 @@ SELECT
 FROM students s, academic_years ay
 WHERE ay.is_current = TRUE
   AND s.status = 'ACTIVE'
-  AND s.id % 10 < 6  -- 60% paid
-ON CONFLICT DO NOTHING;
+  AND s.id % 10 < 6;  -- 60% paid
 
 -- ── 8. Exams and exam results ────────────────────────────────
 CREATE TABLE IF NOT EXISTS exams (
@@ -253,8 +249,7 @@ FROM academic_years ay,
     ('Mid-Term Exam 2025',   'MID_TERM', '2025-02-17', '2025-02-21', 'COMPLETED'),
     ('Term 1 End Exam 2025', 'TERM_END', '2025-03-24', '2025-04-01', 'SCHEDULED')
 ) AS e(name, etype, sdate, edate, status)
-WHERE ay.is_current = TRUE
-ON CONFLICT DO NOTHING;
+WHERE ay.is_current = TRUE;
 
 -- ── 9. Attendance table ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS attendance (
@@ -313,8 +308,7 @@ FROM
      'The Parent-Teacher Association (PTA) meeting is scheduled for Saturday 22nd February 2025 at 10:00 AM. All parents are strongly encouraged to attend.',
      'PARENTS', FALSE)
 ) AS n(title, body, audience, pinned)
-CROSS JOIN (SELECT id FROM staff WHERE role = 'PRINCIPAL' OR role = 'DEPUTY_PRINCIPAL' LIMIT 1) s
-ON CONFLICT DO NOTHING;
+CROSS JOIN (SELECT id FROM staff WHERE role = 'PRINCIPAL' OR role = 'DEPUTY_PRINCIPAL' LIMIT 1) s;
 
 -- Final summary
 SELECT 'Students' AS entity, COUNT(*) AS count FROM students
