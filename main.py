@@ -105,12 +105,38 @@ def get_db():
 
 
 # ════════════════════════════════════════════════════════════════
-# HEALTH
+# HEALTH & INITIALIZATION
 # ════════════════════════════════════════════════════════════════
 
 @app.get("/api/health")
 def health():
     return {"status": "ok", "service": "Kwale High School SMS", "version": "2.0"}
+
+@app.get("/api/init-db")
+def init_db_endpoint():
+    """Temporary endpoint to initialize the database on Render Free Tier."""
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        sql_files = ["schema_generated.sql", "seed_extra.sql"]
+        results = []
+        
+        for file in sql_files:
+            if os.path.exists(file):
+                with open(file, 'r', encoding='utf-8') as f:
+                    sql = f.read()
+                    cur.execute(sql)
+                conn.commit()
+                results.append(f"Successfully executed {file}")
+            else:
+                results.append(f"Warning: {file} not found")
+                
+        conn.close()
+        return {"status": "success", "message": "Database initialized successfully!", "details": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to initialize database: {e}")
+
 
 
 # ════════════════════════════════════════════════════════════════
