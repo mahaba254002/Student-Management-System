@@ -36,7 +36,7 @@
                 <h2>User Management</h2>
                 <p>Manage login credentials and system access roles</p>
             </div>
-            <button class="btn btn-primary" onclick="alert('Feature coming soon')">➕ Add User</button>
+            <button class="btn btn-primary" onclick="document.getElementById('addUserModal').classList.add('active')">➕ Add User</button>
         </div>
 
         <div class="page-toolbar">
@@ -65,6 +65,57 @@
             </div>
         </div>
 
+        <!-- Modals -->
+        <div class="modal-overlay" id="addUserModal">
+            <div class="modal">
+                <button class="modal-close" onclick="document.getElementById('addUserModal').classList.remove('active')">&times;</button>
+                <h3 style="margin-bottom:16px;">Add New User</h3>
+                <form id="addUserForm" onsubmit="submitAddUser(event)">
+                    <div style="margin-bottom:12px;">
+                        <label>Username</label>
+                        <input type="text" id="addUsername" required style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label>Password</label>
+                        <input type="password" id="addPassword" required style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label>Role</label>
+                        <select id="addRole" required style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" onchange="toggleRoleFields()">
+                            <option value="ADMIN">Admin</option>
+                            <option value="PRINCIPAL">Principal</option>
+                            <option value="DEPUTY_PRINCIPAL">Deputy Principal</option>
+                            <option value="HOD">HOD</option>
+                            <option value="TEACHER">Teacher</option>
+                            <option value="ACCOUNTANT">Accountant</option>
+                            <option value="PARENT">Parent</option>
+                            <option value="STUDENT">Student</option>
+                        </select>
+                    </div>
+                    <div id="parentFields" style="display:none;margin-bottom:12px;">
+                        <input type="text" id="addStudentAdm" placeholder="Student Admission Number" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                        <input type="text" id="addParentFirst" placeholder="Parent First Name" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                        <input type="text" id="addParentLast" placeholder="Parent Last Name" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create User</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="resetModal">
+            <div class="modal">
+                <button class="modal-close" onclick="document.getElementById('resetModal').classList.remove('active')">&times;</button>
+                <h3 style="margin-bottom:16px;">Reset Password</h3>
+                <form id="resetForm" onsubmit="submitResetPassword(event)">
+                    <input type="hidden" id="resetUserId">
+                    <div style="margin-bottom:12px;">
+                        <label>New Password</label>
+                        <input type="password" id="resetPassword" required minlength="6" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Save Password</button>
+                </form>
+            </div>
+        </div>
     </main>
 </div>
 
@@ -137,7 +188,7 @@ function renderUsers() {
                 <td><span class="badge ${statusCls}">${statusLbl}</span></td>
                 <td style="font-size:12px;">${linked}</td>
                 <td>
-                    <button class="btn btn-outline btn-sm">Reset Password</button>
+                    <button class="btn btn-outline btn-sm" onclick="openResetModal(${u.id})">Reset Password</button>
                 </td>
             </tr>
         `;
@@ -145,6 +196,62 @@ function renderUsers() {
 }
 
 document.getElementById('search-input').addEventListener('input', renderUsers);
+
+function toggleRoleFields() {
+    const role = document.getElementById('addRole').value;
+    document.getElementById('parentFields').style.display = (role === 'PARENT' || role === 'parent') ? 'block' : 'none';
+}
+
+function openResetModal(userId) {
+    document.getElementById('resetUserId').value = userId;
+    document.getElementById('resetPassword').value = '';
+    document.getElementById('resetModal').classList.add('active');
+}
+
+async function submitAddUser(e) {
+    e.preventDefault();
+    const payload = {
+        username: document.getElementById('addUsername').value,
+        password: document.getElementById('addPassword').value,
+        role: document.getElementById('addRole').value
+    };
+    if(payload.role === 'PARENT' || payload.role === 'parent') {
+        payload.role = 'parent';
+        payload.student_admission_number = document.getElementById('addStudentAdm').value;
+        payload.parent_first_name = document.getElementById('addParentFirst').value;
+        payload.parent_last_name = document.getElementById('addParentLast').value;
+    }
+    try {
+        const res = await apiFetch('/api/users', {
+            method: 'POST',
+            body: payload
+        });
+        if(res) {
+            document.getElementById('addUserModal').classList.remove('active');
+            loadUsers();
+        }
+    } catch(err) {
+        alert('Network error');
+    }
+}
+
+async function submitResetPassword(e) {
+    e.preventDefault();
+    const userId = document.getElementById('resetUserId').value;
+    const pwd = document.getElementById('resetPassword').value;
+    try {
+        const res = await apiFetch('/api/users/' + userId + '/reset-password', {
+            method: 'PATCH',
+            body: {password: pwd}
+        });
+        if(res) {
+            document.getElementById('resetModal').classList.remove('active');
+            alert('Password reset successfully');
+        }
+    } catch(err) {
+        alert('Network error');
+    }
+}
 
 loadUsers();
 </script>
