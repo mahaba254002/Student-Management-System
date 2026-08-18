@@ -77,7 +77,7 @@
                     </div>
                     <div style="margin-bottom:12px;">
                         <label>Password</label>
-                        <input type="password" id="addPassword" required style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                        <input type="text" id="addPassword" required style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" placeholder="Enter password (plain text)">
                     </div>
                     <div style="margin-bottom:12px;">
                         <label>Role</label>
@@ -110,7 +110,7 @@
                     <input type="hidden" id="resetUserId">
                     <div style="margin-bottom:12px;">
                         <label>New Password</label>
-                        <input type="password" id="resetPassword" required minlength="6" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;">
+                        <input type="text" id="resetPassword" required minlength="6" style="width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;" placeholder="Enter new password (plain text)">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width:100%;">Save Password</button>
                 </form>
@@ -197,6 +197,14 @@ function renderUsers() {
 
 document.getElementById('search-input').addEventListener('input', renderUsers);
 
+function showToast(msg, type='success') {
+    const toast = document.getElementById('khs-toast');
+    if (!toast) return alert(msg);
+    toast.textContent = msg;
+    toast.className = type + ' show';
+    setTimeout(() => toast.className = '', 3000);
+}
+
 function toggleRoleFields() {
     const role = document.getElementById('addRole').value;
     document.getElementById('parentFields').style.display = (role === 'PARENT' || role === 'parent') ? 'block' : 'none';
@@ -224,14 +232,17 @@ async function submitAddUser(e) {
     try {
         const res = await apiFetch('/api/users', {
             method: 'POST',
-            body: payload
+            body: JSON.stringify(payload)
         });
         if(res) {
             document.getElementById('addUserModal').classList.remove('active');
+            showToast('User created successfully');
             loadUsers();
+        } else {
+            showToast('Failed to create user', 'error');
         }
     } catch(err) {
-        alert('Network error');
+        showToast('Network error', 'error');
     }
 }
 
@@ -242,14 +253,16 @@ async function submitResetPassword(e) {
     try {
         const res = await apiFetch('/api/users/' + userId + '/reset-password', {
             method: 'PATCH',
-            body: {password: pwd}
+            body: JSON.stringify({password: pwd})
         });
         if(res) {
             document.getElementById('resetModal').classList.remove('active');
-            alert('Password reset successfully');
+            showToast('Password reset successfully');
+        } else {
+            showToast('Failed to reset password', 'error');
         }
     } catch(err) {
-        alert('Network error');
+        showToast('Network error', 'error');
     }
 }
 
