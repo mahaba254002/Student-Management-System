@@ -163,9 +163,38 @@
             .wb-text h2 { font-size: 17px; }
             .wb-date .date-val { font-size: 18px; }
             .quick-grid { grid-template-columns: repeat(3, 1fr); }
+
+            /* Horizontal scrolling notices on mobile */
+            .notice-list {
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                padding: 4px 2px 14px;
+                gap: 12px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            .notice-item {
+                flex: 0 0 280px;
+                min-width: 260px;
+                max-width: 310px;
+                scroll-snap-align: start;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            /* Compact scrollable recent students on mobile */
+            .dash-grid-2 .table-scroll {
+                max-height: 290px;
+                overflow-y: auto;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
         @media (max-width: 480px) {
             .quick-grid { grid-template-columns: repeat(2, 1fr); }
+            .notice-item { flex: 0 0 85vw; min-width: 240px; }
         }
     </style>
 </head>
@@ -215,38 +244,38 @@
 
         <!-- ── Stat Cards ── -->
         <div class="stats-grid" id="stats-grid">
-            <div class="stat-card loading" id="card-students">
+            <a href="admin-students.html" class="stat-card loading" id="card-students" title="View all enrolled students">
                 <div class="stat-info">
                     <div class="stat-label">Enrolled Students</div>
                     <div class="stat-value" id="val-students">—</div>
-                    <div class="stat-sub" id="sub-students">Loading…</div>
+                    <div class="stat-sub" id="sub-students">Active enrollment</div>
                 </div>
                 <div class="stat-icon green">🎓</div>
-            </div>
-            <div class="stat-card loading" id="card-teachers">
+            </a>
+            <a href="admin-people.html?type=teachers" class="stat-card loading" id="card-teachers" title="View active teaching staff">
                 <div class="stat-info">
                     <div class="stat-label">Active Teachers</div>
                     <div class="stat-value" id="val-teachers">—</div>
-                    <div class="stat-sub" id="sub-teachers">Loading…</div>
+                    <div class="stat-sub" id="sub-teachers">Teaching staff</div>
                 </div>
                 <div class="stat-icon blue">👨‍🏫</div>
-            </div>
-            <div class="stat-card loading" id="card-staff">
+            </a>
+            <a href="admin-people.html?type=nonteaching" class="stat-card loading" id="card-staff" title="View support & non-teaching staff">
                 <div class="stat-info">
                     <div class="stat-label">Support Staff</div>
                     <div class="stat-value" id="val-staff">—</div>
-                    <div class="stat-sub" id="sub-staff">Loading…</div>
+                    <div class="stat-sub" id="sub-staff">Non-teaching staff</div>
                 </div>
                 <div class="stat-icon gray">👷</div>
-            </div>
-            <div class="stat-card loading" id="card-boarders">
+            </a>
+            <a href="admin-dormitories.html" class="stat-card loading" id="card-boarders" title="View dormitories & boarding students">
                 <div class="stat-info">
                     <div class="stat-label">Boarders</div>
                     <div class="stat-value" id="val-boarders">—</div>
-                    <div class="stat-sub" id="sub-boarders">Loading…</div>
+                    <div class="stat-sub" id="sub-boarders">Boarding facilities</div>
                 </div>
                 <div class="stat-icon amber">🛏️</div>
-            </div>
+            </a>
         </div>
 
         <!-- ── Quick Access ── -->

@@ -532,11 +532,19 @@
             }
 
             .filters-card {
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .search-input {
+                grid-column: 1 / -1;
+                width: 100% !important;
             }
 
             .filter-select {
-                width: 100%;
+                width: 100% !important;
+                min-width: 0 !important;
             }
 
             .modal-overlay {
@@ -555,6 +563,13 @@
         }
 
         @media (max-width: 480px) {
+            .filters-card {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-select {
+                grid-column: 1 / -1;
+            }
 
             .summary-grid {
                 grid-template-columns: 1fr;

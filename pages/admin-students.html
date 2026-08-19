@@ -60,8 +60,35 @@
         @media(max-width:600px) {
             .summary-grid { grid-template-columns:1fr 1fr; gap:10px; }
             .sc-value { font-size:22px; }
-            .page-toolbar { flex-direction:column; }
-            .page-toolbar .search-bar { width:100%; }
+            .page-toolbar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                width: 100%;
+            }
+            .page-toolbar .search-bar {
+                grid-column: 1 / -1;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+            .page-toolbar .form-select {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+            .page-toolbar .btn {
+                grid-column: 1 / -1;
+                width: 100% !important;
+                justify-content: center;
+            }
+        }
+        @media(max-width:420px) {
+            .page-toolbar {
+                grid-template-columns: 1fr;
+            }
+            .page-toolbar .form-select {
+                grid-column: 1 / -1;
+            }
         }
     </style>
 </head>

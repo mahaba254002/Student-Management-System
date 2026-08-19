@@ -331,9 +331,16 @@ body {
     box-shadow: var(--shadow-sm);
     display: flex; align-items: center; justify-content: space-between;
     border: 1px solid var(--gray-border);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--green);
+}
 
 .stat-info .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
 .stat-info .stat-value { font-size: 26px; font-weight: 700; color: var(--dark); line-height: 1; }
@@ -690,16 +697,74 @@ body {
     /* Tabs */
     .tabs { overflow-x: auto; width: 100%; }
 
-    /* Page toolbar */
-    .page-toolbar { gap: 8px; }
-    .page-toolbar .search-bar { min-width: 0; flex: 1; }
+    /* Page toolbar - anti-funnel responsive grid */
+    .page-toolbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+    }
+    .page-toolbar .search-bar {
+        grid-column: 1 / -1;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    .page-toolbar .form-select,
+    .page-toolbar select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    .page-toolbar .btn,
+    .page-toolbar button {
+        grid-column: 1 / -1;
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    /* Notices horizontal swipe on mobile */
+    .notice-list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .notice-item {
+        flex: 0 0 280px;
+        min-width: 260px;
+        max-width: 310px;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* Dashboard recent students compact scroll */
+    .dash-grid-2 .table-scroll,
+    .card .table-scroll {
+        max-height: 310px;
+        overflow-y: auto;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 
     /* Table scroll */
-    .table-scroll { overflow-x: auto; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .data-table { min-width: 600px; }
 }
 
-/* ── Small mobile (≤420px) ─────────────────────────────── */
+/* ── Small mobile (≤480px) ─────────────────────────────── */
+@media (max-width: 480px) {
+    .page-toolbar { grid-template-columns: 1fr; }
+    .page-toolbar .form-select,
+    .page-toolbar select { grid-column: 1 / -1; }
+}
+
+/* ── Very small mobile (≤420px) ─────────────────────────────── */
 @media (max-width: 420px) {
     .stats-grid { grid-template-columns: 1fr; gap: 10px; }
     .stat-info .stat-value { font-size: 19px; }
