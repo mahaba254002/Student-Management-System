@@ -57,37 +57,26 @@
         .empty-row td { text-align:center; padding:40px; color:var(--text-muted); font-size:13px; }
 
         @media(max-width:900px) { .summary-grid { grid-template-columns:repeat(2,1fr); } }
-        @media(max-width:600px) {
+        @media(max-width:768px) {
             .summary-grid { grid-template-columns:1fr 1fr; gap:10px; }
             .sc-value { font-size:22px; }
             .page-toolbar {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                width: 100%;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                width: 100% !important;
             }
-            .page-toolbar .search-bar {
-                grid-column: 1 / -1;
+            .page-toolbar .search-bar,
+            .page-toolbar .form-select,
+            .page-toolbar .btn {
                 width: 100% !important;
                 max-width: 100% !important;
-                min-width: 0 !important;
-            }
-            .page-toolbar .form-select {
-                width: 100% !important;
-                min-width: 0 !important;
+                min-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .page-toolbar .btn {
-                grid-column: 1 / -1;
-                width: 100% !important;
-                justify-content: center;
-            }
-        }
-        @media(max-width:420px) {
-            .page-toolbar {
-                grid-template-columns: 1fr;
-            }
-            .page-toolbar .form-select {
-                grid-column: 1 / -1;
+                justify-content: center !important;
             }
         }
     </style>
@@ -157,14 +146,14 @@
 
         <!-- Toolbar -->
         <div class="page-toolbar">
-            <div class="search-bar" style="flex:1;min-width:200px;max-width:420px;">
+            <div class="search-bar">
                 <span>🔍</span>
                 <input type="text" id="search-input" placeholder="Search by name or admission number…" autocomplete="off">
             </div>
-            <select class="form-select" id="filter-class" style="min-width:160px;">
+            <select class="form-select" id="filter-class">
                 <option value="">All Classes</option>
             </select>
-            <select class="form-select" id="filter-status" style="min-width:130px;">
+            <select class="form-select" id="filter-status">
                 <option value="">All Statuses</option>
                 <option value="ACTIVE">Active</option>
                 <option value="TRANSFERRED">Transferred</option>

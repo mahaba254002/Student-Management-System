@@ -45,38 +45,27 @@
 
         .empty-row td { text-align:center; padding:40px; color:var(--text-muted); }
 
-        @media(max-width:600px) {
+        @media(max-width:768px) {
             .page-toolbar {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                width: 100%;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                width: 100% !important;
             }
-            .page-toolbar .search-bar {
-                grid-column: 1 / -1;
+            .page-toolbar .search-bar,
+            .page-toolbar .form-select,
+            .page-toolbar .btn {
                 width: 100% !important;
                 max-width: 100% !important;
-                min-width: 0 !important;
-            }
-            .page-toolbar .form-select {
-                width: 100% !important;
-                min-width: 0 !important;
+                min-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .page-toolbar .btn {
-                grid-column: 1 / -1;
-                width: 100% !important;
-                justify-content: center;
+                justify-content: center !important;
             }
-            .stat-pills { width: 100%; }
+            .stat-pills { width: 100%; display: flex; }
             .stat-pill { flex: 1; text-align: center; }
-        }
-        @media(max-width:420px) {
-            .page-toolbar {
-                grid-template-columns: 1fr;
-            }
-            .page-toolbar .form-select {
-                grid-column: 1 / -1;
-            }
         }
     </style>
 </head>
@@ -239,11 +228,11 @@
 
         <!-- Toolbar -->
         <div class="page-toolbar">
-            <div class="search-bar" style="flex:1;max-width:420px;">
+            <div class="search-bar">
                 <span>🔍</span>
                 <input type="text" id="search-input" placeholder="Search by name, email, staff no…" autocomplete="off">
             </div>
-            <select class="form-select" id="filter-role" style="min-width:160px;">
+            <select class="form-select" id="filter-role">
                 <option value="">All Roles</option>
                 <option value="PRINCIPAL">Principal</option>
                 <option value="DEPUTY_PRINCIPAL">Deputy Principal</option>
@@ -260,7 +249,7 @@
                 <option value="DRIVER">Driver</option>
                 <option value="CLEANER">Cleaner</option>
             </select>
-            <select class="form-select" id="filter-status" style="min-width:130px;">
+            <select class="form-select" id="filter-status">
                 <option value="">All Statuses</option>
                 <option value="ACTIVE">Active</option>
                 <option value="ON_LEAVE">On Leave</option>

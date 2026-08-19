@@ -45,7 +45,12 @@
         .wb-date .date-sub { font-size: 11px; opacity: 0.72; margin-top: 2px; }
 
         /* Stat cards with skeleton loading */
-        .stat-card { position: relative; overflow: hidden; }
+        .stat-card { position: relative; overflow: hidden; text-decoration: none !important; }
+        a.stat-card, a.stat-card:hover, a.stat-card:focus,
+        .stat-card, .stat-card *, .stat-info *,
+        .quick-item, .quick-item * {
+            text-decoration: none !important;
+        }
         .stat-card.loading::after {
             content: '';
             position: absolute; inset: 0;

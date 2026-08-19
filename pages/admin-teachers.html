@@ -532,19 +532,19 @@
             }
 
             .filters-card {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .search-input {
-                grid-column: 1 / -1;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
                 width: 100% !important;
             }
 
+            .search-input,
             .filter-select {
                 width: 100% !important;
-                min-width: 0 !important;
+                max-width: 100% !important;
+                min-width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             .modal-overlay {
@@ -563,14 +563,6 @@
         }
 
         @media (max-width: 480px) {
-            .filters-card {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-select {
-                grid-column: 1 / -1;
-            }
-
             .summary-grid {
                 grid-template-columns: 1fr;
             }
